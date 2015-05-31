@@ -4,6 +4,7 @@
 
 #include <string>
 #include <list>
+#include "ComPoint.hpp"
 
 using namespace std;
 
@@ -31,6 +32,15 @@ class Plugin{
 			this->name = new string(name);
 			this->pluginNumber = pluginNumber;
 			this->udsFilePath = new string(path);
+			comPoint = NULL;
+		}
+
+		Plugin(Plugin* plugin)
+		{
+			this->name = new string(*(plugin->getName()));
+			this->pluginNumber = plugin->getPluginNumber();
+			this->udsFilePath = new string(*(plugin->getUdsFilePath()));
+			comPoint = NULL;
 		}
 
 		/**
@@ -41,6 +51,15 @@ class Plugin{
 			delete name;
 			delete udsFilePath;
 			deleteMethodList();
+			if(comPoint != NULL)
+				delete comPoint;
+		}
+
+		ComPoint* getComPoint(){return this->comPoint;}
+
+		void setComPoint(ComPoint* comPoint)
+		{
+			this->comPoint = comPoint;
 		}
 
 
@@ -103,6 +122,8 @@ class Plugin{
 		string* udsFilePath;
 		/*! Contains all methodnames which where added via addMethod().*/
 		list<string*> methods;
+		/*! This variable will be used by connection-context for connection to a plugin.*/
+		ComPoint* comPoint;
 
 
 		/**

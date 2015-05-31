@@ -10,6 +10,7 @@
 
 #include <pthread.h>
 #include "RPCMsg.hpp"
+#include "Error.hpp"
 #include "WorkerInterface.hpp"
 
 class ProcessInterface{
@@ -31,18 +32,31 @@ class ProcessInterface{
 		void processMsg(RPCMsg* rpcMsg)
 		{
 			pthread_mutex_lock(&processMutex);
-			process(rpcMsg);
+			try
+			{
+				process(rpcMsg);
+			}
+			catch(Error &e)
+			{
+				pthread_mutex_unlock(&processMutex);
+				throw;
+			}
+			catch(...)
+			{
+				pthread_mutex_unlock(&processMutex);
+				throw;
+			}
 			pthread_mutex_unlock(&processMutex);
 		}
 
 		void setWorkerInterface(WorkerInterface<RPCMsg>* workerInterface)
-				{
-					this->workerInterface = workerInterface;
-				}
+		{
+			this->workerInterface = workerInterface;
+		}
 
 	protected:
-		WorkerInterface<RPCMsg>* workerInterface;
 
+		WorkerInterface<RPCMsg>* workerInterface;
 
 
 

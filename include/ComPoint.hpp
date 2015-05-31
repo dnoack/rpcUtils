@@ -24,7 +24,7 @@ class ComPoint : public WorkerInterface<RPCMsg>, public WorkerThreads, public Lo
 
 	public:
 
-		ComPoint(int socket, ProcessInterface* pInterface);
+		ComPoint(int socket, ProcessInterface* pInterface, int uniqueID);
 
 		virtual ~ComPoint();
 
@@ -39,6 +39,8 @@ class ComPoint : public WorkerInterface<RPCMsg>, public WorkerThreads, public Lo
 
 
 	private:
+
+		int uniqueID;
 
 		ProcessInterface* pInterface;
 

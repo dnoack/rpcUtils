@@ -1,10 +1,11 @@
 #include "ComPoint.hpp"
 
 
-ComPoint::ComPoint(int socket, ProcessInterface* pInterface)
+ComPoint::ComPoint(int socket, ProcessInterface* pInterface, int uniqueID)
 {
 	this->currentSocket = socket;
 	this->pInterface = pInterface;
+	this->uniqueID = uniqueID;
 	pInterface->setWorkerInterface(this);
 
 	StartWorkerThread();
@@ -25,7 +26,7 @@ ComPoint::~ComPoint()
 	WaitForListenerThreadToExit();
 	WaitForWorkerThreadToExit();
 
-	delete pInterface;
+	//delete pInterface;
 }
 
 
@@ -126,7 +127,7 @@ void ComPoint::thread_listen()
 						{
 							//add first complete msg of msgbuffer to the receivequeue and signal the worker
 							content = new string(&msgBuffer[HEADER_SIZE], messageSize);
-							pushReceiveQueue(new RPCMsg(0, content));
+							pushReceiveQueue(new RPCMsg(uniqueID, content));
 							pthread_kill(worker_thread, SIGUSR1);
 
 							//Is there more data ?
