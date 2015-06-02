@@ -72,9 +72,16 @@ class WorkerInterface{
 
 		bool isDeletable(){return deletable;}
 
+		void push_frontReceiveQueue(TMsg* data)
+		{
+			pthread_mutex_lock(&rQmutex);
+				receiveQueue.push_front(data);
+			pthread_mutex_unlock(&rQmutex);
+		}
 
 		virtual int transmit(const char* data, int size) = 0;
 		virtual int transmit(TMsg* msg) = 0;
+
 
 
 	protected:
@@ -218,8 +225,6 @@ class WorkerInterface{
 			pthread_mutex_unlock(&rQmutex);
 		}
 
-
-
 		void popReceiveQueueWithoutDelete()
 		{
 			pthread_mutex_lock(&rQmutex);
@@ -228,12 +233,6 @@ class WorkerInterface{
 		}
 
 
-		void pushReceiveQueue(TMsg* data)
-		{
-			pthread_mutex_lock(&rQmutex);
-				receiveQueue.push_front(data);
-			pthread_mutex_unlock(&rQmutex);
-		}
 
 
 		void push_backReceiveQueue(TMsg* data)
@@ -261,12 +260,9 @@ class WorkerInterface{
 			sigemptyset(&sigmask);
 			sigaddset(&sigmask, SIGUSR1);
 			sigaddset(&sigmask, SIGUSR2);
-
 			pthread_sigmask(SIG_BLOCK, &sigmask, &origmask);
 		}
 
 };
-
-
 
 #endif /* WORKERINTERFACE_HPP_ */

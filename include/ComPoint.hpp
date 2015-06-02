@@ -8,6 +8,7 @@
 #ifndef COMPOINT_HPP_
 #define COMPOINT_HPP_
 
+
 #include <unistd.h> //close
 #include <sys/socket.h> //send, recv
 #include <pthread.h>
@@ -24,7 +25,7 @@ class ComPoint : public WorkerInterface<RPCMsg>, public WorkerThreads, public Lo
 
 	public:
 
-		ComPoint(int socket, ProcessInterface* pInterface, int uniqueID);
+		ComPoint(int socket, ProcessInterface* pInterface, int uniqueID, bool viceVersaRegister = true);
 
 		virtual ~ComPoint();
 

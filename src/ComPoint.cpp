@@ -1,12 +1,13 @@
 #include "ComPoint.hpp"
 
 
-ComPoint::ComPoint(int socket, ProcessInterface* pInterface, int uniqueID)
+ComPoint::ComPoint(int socket, ProcessInterface* pInterface, int uniqueID, bool viceVersaRegister)
 {
 	this->currentSocket = socket;
 	this->pInterface = pInterface;
 	this->uniqueID = uniqueID;
-	pInterface->setWorkerInterface(this);
+	if(viceVersaRegister)
+		pInterface->setWorkerInterface(this);
 
 	StartWorkerThread();
 
@@ -25,10 +26,7 @@ ComPoint::~ComPoint()
 
 	WaitForListenerThreadToExit();
 	WaitForWorkerThreadToExit();
-
-	//delete pInterface;
 }
-
 
 
 void ComPoint::configureLogInfo(LogInformation* in, LogInformation* out, LogInformation* info)
@@ -67,16 +65,22 @@ void ComPoint::thread_work()
 						popReceiveQueueWithoutDelete();
 						pInterface->processMsg(msg);
 					}
+					catch(Error &e)
+					{
+
+						dyn_print("Catched instance of error: %s\n", e.get());
+						transmit(e.get(), strlen(e.get()));
+
+					}
 					catch(...)
 					{
-						dyn_print("Unkown Exception.\n");
+						dyn_print("Catched unkown Exception.\n");
 					}
-
 				}
 			break;
 
 			default:
-				dyn_print("ComPoint: Unkown signal \n");
+				dyn_print("Received unkown/not supported signal \n");
 				break;
 		}
 	}
@@ -89,13 +93,10 @@ void ComPoint::thread_listen()
 {
 	listen_thread_active = true;
 	string* content = NULL;
-	int retval = 0;
 	pthread_t worker_thread = getWorker();
-
 
 	FD_ZERO(&rfds);
 	FD_SET(currentSocket, &rfds);
-
 
 	while(listen_thread_active)
 	{
@@ -127,8 +128,16 @@ void ComPoint::thread_listen()
 						{
 							//add first complete msg of msgbuffer to the receivequeue and signal the worker
 							content = new string(&msgBuffer[HEADER_SIZE], messageSize);
-							pushReceiveQueue(new RPCMsg(uniqueID, content));
-							pthread_kill(worker_thread, SIGUSR1);
+							if(!pInterface->isBusy())
+							{
+								push_frontReceiveQueue(new RPCMsg(uniqueID, content));
+								pthread_kill(worker_thread, SIGUSR1);
+							}
+							else
+							{
+								pInterface->setSubMsg(new RPCMsg(uniqueID, content));
+								pthread_kill(worker_thread, SIGUSR2);
+							}
 
 							//Is there more data ?
 							if(msgBufferSize > messageSize+HEADER_SIZE)
@@ -157,6 +166,7 @@ void ComPoint::thread_listen()
 					{
 						delete[] msgBuffer;
 						msgBufferSize = 0;
+						transmit("fail.", 5);
 						//TODO: send msg back, that something went wrong and the message was not correctly received
 					}
 				}
