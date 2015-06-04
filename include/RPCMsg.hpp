@@ -55,12 +55,17 @@ class RPCMsg{
 		 */
 		string* getContent(){return this->content;}
 
+		int getJsonRpcId(){return this->jsonRpcId;}
+		void setJsonRpcId(int jsonRpcId){this->jsonRpcId = jsonRpcId;}
+
 
 	private:
 		/*! Sender id which is 0 for tcp clients and greater 0 for plugins.*/
 		int sender;
 		/*! This is the proper message, hopefully containing a valid json rpc message.*/
 		string* content;
+
+		int jsonRpcId;
 
 
 };

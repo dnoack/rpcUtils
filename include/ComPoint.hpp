@@ -8,6 +8,7 @@
 #ifndef COMPOINT_HPP_
 #define COMPOINT_HPP_
 
+#define JSON_ERROR_RESPONSE_INCORECCT_MSG "{\"jsonrpc\": \"2.0\", \"error\": {\"code\":  -1, \"message\": \"Received message with invalid packet encoding.\"}, \"id\": 0}"
 
 #include <unistd.h> //close
 #include <sys/socket.h> //send, recv

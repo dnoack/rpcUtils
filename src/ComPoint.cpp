@@ -67,18 +67,17 @@ void ComPoint::thread_work()
 					}
 					catch(Error &e)
 					{
-						dyn_print("Catched instance of error: %s\n", e.get());
-						transmit(e.get(), strlen(e.get()));
+						dlog(logInfo, "Catched instance of error: %s\n", e.get());
 					}
 					catch(...)
 					{
-						dyn_print("Catched unkown Exception.\n");
+						log(logInfo, "Catched unkown Exception.\n");
 					}
 				}
 			break;
 
 			default:
-				dyn_print("Received unkown/not supported signal \n");
+				log(logInfo, "Received unkown/not supported signal \n");
 				break;
 		}
 	}
@@ -168,9 +167,7 @@ void ComPoint::thread_listen()
 							delete[] msgBuffer;
 							msgBuffer = NULL;
 							msgBufferSize = 0;
-							transmit("fail.", 5);
-							printf("fail.\n");
-							//TODO: send msg back, that something went wrong and the message was not correctly received
+							transmit(JSON_ERROR_RESPONSE_INCORECCT_MSG, strlen(JSON_ERROR_RESPONSE_INCORECCT_MSG));
 						}
 					}
 					//not even the header was complete, wait for the rest

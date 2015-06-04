@@ -13,6 +13,7 @@
 #include "Error.hpp"
 #include "WorkerInterface.hpp"
 
+
 class ProcessInterface{
 
 
@@ -43,15 +44,19 @@ class ProcessInterface{
 			catch(Error &e)
 			{
 				pthread_mutex_unlock(&processMutex);
+				//throw to ComPoint
 				throw;
 			}
 			catch(...)
 			{
 				pthread_mutex_unlock(&processMutex);
+				//throw to ComPoint
 				throw;
 			}
+			//everything is fine
 			pthread_mutex_unlock(&processMutex);
 		}
+
 
 		void setWorkerInterface(WorkerInterface<RPCMsg>* workerInterface)
 		{
