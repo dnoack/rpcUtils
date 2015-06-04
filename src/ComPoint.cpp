@@ -67,10 +67,8 @@ void ComPoint::thread_work()
 					}
 					catch(Error &e)
 					{
-
 						dyn_print("Catched instance of error: %s\n", e.get());
 						transmit(e.get(), strlen(e.get()));
-
 					}
 					catch(...)
 					{
@@ -106,75 +104,87 @@ void ComPoint::thread_listen()
 		recvSize = recv(currentSocket , receiveBuffer, BUFFER_SIZE, 0);
 		if(recvSize > 0)
 		{
-			//copy receiveBuffer to a clean msgBuffer
-			msgBufferSize = recvSize;
-			msgBuffer = new char[msgBufferSize];
-			memset(msgBuffer, '\0', msgBufferSize);
-			memcpy(msgBuffer, receiveBuffer, msgBufferSize);
+			try{
+				//copy receiveBuffer to a clean msgBuffer
+				msgBufferSize = recvSize;
+				msgBuffer = new char[msgBufferSize];
+				memset(msgBuffer, '\0', msgBufferSize);
+				memcpy(msgBuffer, receiveBuffer, msgBufferSize);
 
-			//As long as there is data in the msgBuffer
-			while(msgBufferSize > 0)
-			{
-				//headersize = 1 byte tagfield + 4 byte lengthfield
-				if(msgBufferSize > HEADER_SIZE)
+				//As long as there is data in the msgBuffer
+				while(msgBufferSize > 0)
 				{
-					messageSize = readHeader(msgBuffer);
-
-					//header ok ???
-					if(messageSize > -1)
+					//headersize = 1 byte tagfield + 4 byte lengthfield
+					if(msgBufferSize > HEADER_SIZE)
 					{
-						//Is there at least one complete message in msgBuffer ?
-						if(msgBufferSize >= messageSize+HEADER_SIZE)
-						{
-							//add first complete msg of msgbuffer to the receivequeue and signal the worker
-							content = new string(&msgBuffer[HEADER_SIZE], messageSize);
-							if(!pInterface->isBusy())
-							{
-								push_frontReceiveQueue(new RPCMsg(uniqueID, content));
-								pthread_kill(worker_thread, SIGUSR1);
-							}
-							else
-							{
-								pInterface->setSubMsg(new RPCMsg(uniqueID, content));
-								pthread_kill(worker_thread, SIGUSR2);
-							}
+						messageSize = readHeader(msgBuffer);
 
-							//Is there more data ?
-							if(msgBufferSize > messageSize+HEADER_SIZE)
+						//header ok ???
+						if(messageSize > -1)
+						{
+							//Is there at least one complete message in msgBuffer ?
+							if(msgBufferSize >= messageSize+HEADER_SIZE)
 							{
-								//copy rest of data to a new clean msgBuffer
-								msgBufferSize = msgBufferSize - (messageSize+HEADER_SIZE);
-								tempBuffer = new char[msgBufferSize];
-								memset(tempBuffer, '\0', msgBufferSize);
-								memcpy(tempBuffer, &(msgBuffer[messageSize+HEADER_SIZE]), msgBufferSize);
-								delete[] msgBuffer;
-								msgBuffer = tempBuffer;
+								//add first complete msg of msgbuffer to the receivequeue and signal the worker
+								content = new string(&msgBuffer[HEADER_SIZE], messageSize);
+								if(!pInterface->isBusy())
+								{
+									push_frontReceiveQueue(new RPCMsg(uniqueID, content));
+									pthread_kill(worker_thread, SIGUSR1);
+								}
+								else
+								{
+									pInterface->setSubMsg(new RPCMsg(uniqueID, content));
+									pthread_kill(worker_thread, SIGUSR2);
+								}
+
+								//Is there more data ?
+								if(msgBufferSize > messageSize+HEADER_SIZE)
+								{
+									//copy rest of data to a new clean msgBuffer
+									msgBufferSize = msgBufferSize - (messageSize+HEADER_SIZE);
+									tempBuffer = new char[msgBufferSize];
+									memset(tempBuffer, '\0', msgBufferSize);
+									memcpy(tempBuffer, &(msgBuffer[messageSize+HEADER_SIZE]), msgBufferSize);
+									delete[] msgBuffer;
+									msgBuffer = tempBuffer;
+									tempBuffer = NULL;
+								}
+								else
+								{
+									delete[] msgBuffer;
+									msgBuffer = NULL;
+									msgBufferSize = 0;
+								}
 							}
+							//message is not complete, wait for the rest
 							else
 							{
-								delete[] msgBuffer;
-								msgBufferSize = 0;
+								waitForFurtherData();
 							}
 						}
-						//message is not complete, wait for the rest
 						else
 						{
-							waitForFurtherData();
+							delete[] msgBuffer;
+							msgBuffer = NULL;
+							msgBufferSize = 0;
+							transmit("fail.", 5);
+							printf("fail.\n");
+							//TODO: send msg back, that something went wrong and the message was not correctly received
 						}
 					}
+					//not even the header was complete, wait for the rest
 					else
 					{
-						delete[] msgBuffer;
-						msgBufferSize = 0;
-						transmit("fail.", 5);
-						//TODO: send msg back, that something went wrong and the message was not correctly received
+						waitForFurtherData();
 					}
 				}
-				//not even the header was complete, wait for the rest
-				else
-				{
-					waitForFurtherData();
-				}
+			}
+			catch(Error &e)
+			{
+				delete[] msgBuffer;
+				msgBuffer = NULL;
+				msgBufferSize = 0;
 			}
 		}
 		else

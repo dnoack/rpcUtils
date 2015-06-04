@@ -36,6 +36,7 @@ class LogUnit
 			logInfo.logLevel = LOG_INFO;
 			logInfo.logName = ":";
 			globalLogLevel = 7;
+			lineSize = LINESIZE;
 		}
 
 		virtual ~LogUnit(){};
@@ -48,10 +49,13 @@ class LogUnit
 			return oldLevel;
 		}
 
+		void setLineSize(int lineSize){this->lineSize = lineSize;}
+
 
 	protected:
 
 		LogInformation logInfo;
+		int lineSize;
 
 		void log(LogInformation info, string* msg)
 		{
@@ -62,14 +66,6 @@ class LogUnit
 			}
 		}
 
-		void log(LogInformation info, char* msg)
-		{
-			if(info.logLevel == (info.logLevel & globalLogLevel))
-			{
-				string* logMsg = new string(msg);
-				_log(info.logName, logMsg);
-			}
-		}
 
 		void log(LogInformation info, const char* msg)
 		{
@@ -114,14 +110,10 @@ class LogUnit
 		{
 			int printed = 0;
 
-			#ifdef DEBUG
-				va_list arguments;
-				va_start(arguments, data);
-				printed = vprintf(data, arguments);
-				va_end(arguments);
-			#endif
-				//there can be other print-like functions
-
+			va_list arguments;
+			va_start(arguments, data);
+			printed = vprintf(data, arguments);
+			va_end(arguments);
 			return printed;
 		}
 
@@ -129,12 +121,12 @@ class LogUnit
 	{
 		string* data = *input;
 		int temp = data->size();
-		int newlineCount = temp / LINESIZE;
-		int size = newlineCount*LINESIZE;
+		int newlineCount = temp / (lineSize-offset);
+		int size = newlineCount*(lineSize+offset);
 
 		data->insert(0, offset, ' ');
 
-		for(int i = LINESIZE ; i <= size ; i+= LINESIZE)
+		for(int i = lineSize ; i <= size ; i+= lineSize)
 		{
 			data->insert(i, "\n");
 			data->insert(i+1, offset, ' ');

@@ -12,6 +12,7 @@
 #include "signal.h"
 
 #include "LogUnit.hpp"
+#include "Error.hpp"
 
 
 #define BUFFER_SIZE 2048 //in byte
@@ -67,6 +68,10 @@ class WorkerInterface{
 		{
 			delete[] headerIn;
 			delete[] headerOut;
+
+			deleteBuffer(msgBuffer);
+			deleteBuffer(tempBuffer);
+
 			pthread_mutex_destroy(&rQmutex);
 		};
 
@@ -162,8 +167,6 @@ class WorkerInterface{
 
 
 
-
-
 		void waitForFurtherData()
 		{
 			//wait for more with select and timeout
@@ -181,21 +184,24 @@ class WorkerInterface{
 				//copy old data, then copy new data to new buffer, delete old one
 				memcpy(tempBuffer, msgBuffer, oldMsgBufferSize);
 				memcpy(&tempBuffer[oldMsgBufferSize], receiveBuffer, recvSize);
-				delete[] msgBuffer;
+				deleteBuffer(msgBuffer);
 				msgBuffer = tempBuffer;
+				tempBuffer = NULL;
 			}
 			else if(retval == 0)
 			{
-				delete[] msgBuffer;
+				deleteBuffer(msgBuffer);
 				msgBufferSize = 0;
+				msgBuffer = NULL;
+				throw Error("Timeout while waiting for further data.");
 			}
 			else
 			{
 				//errno prüfen
 				//error msg senden
+				throw Error("Error while waiting for further data.");
 			}
 		}
-
 
 
 		void deleteReceiveQueue()
@@ -261,6 +267,15 @@ class WorkerInterface{
 			sigaddset(&sigmask, SIGUSR1);
 			sigaddset(&sigmask, SIGUSR2);
 			pthread_sigmask(SIG_BLOCK, &sigmask, &origmask);
+		}
+
+		inline void deleteBuffer(char* buffer)
+		{
+			if(buffer != NULL)
+			{
+				delete[] buffer;
+				buffer = NULL;
+			}
 		}
 
 };

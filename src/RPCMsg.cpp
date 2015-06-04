@@ -5,7 +5,7 @@
 RPCMsg::RPCMsg(int sender, string* content)
 {
 	this->sender = sender;
-	this->content = new string(*content);
+	this->content = content;
 };
 
 
