@@ -29,6 +29,87 @@ TEST_GROUP(ComPoint)
 };
 
 
+
+TEST(ComPoint, receiveMsg_everythingSplitted)
+{
+	char* header = new char[5];
+	string* msg = new string("Hallo das ist eine Testnachricht, welche geteilt übertragen wird. Der Header übrigens auch.");
+	string subMsg = msg->substr(0, 10);
+	string subMsg2 = msg->substr(10, msg->size());
+	comPoint->createHeader(header, msg->size());
+
+	send(helper->getClientSocket(), header, 1, 0);
+	send(helper->getClientSocket(), &header[1], 4, 0);
+	sleep(1);
+	send(helper->getClientSocket(), subMsg.c_str(), subMsg.size(), 0);
+	send(helper->getClientSocket(), subMsg2.c_str(), subMsg2.size(), 0);
+	sleep(1);
+
+	if(processInterface->receivedMsg == NULL)
+	{
+		FAIL("Could not receive a correct Message, maybe a timeout happened.");
+	}
+	else
+		STRCMP_EQUAL(msg->c_str(), processInterface->receivedMsg->getContent()->c_str());
+
+	processInterface->reset();
+	delete[] header;
+	delete msg;
+}
+
+
+
+
+TEST(ComPoint, receiveMsg_splittedHeader)
+{
+	char* header = new char[5];
+	string* msg = new string("Der Header dieser Nachricht wurde in zwei Teilen übertragen.");
+	comPoint->createHeader(header, msg->size());
+	send(helper->getClientSocket(), header, 3, 0);
+	sleep(1);
+	send(helper->getClientSocket(), &header[3], 2, 0);
+	send(helper->getClientSocket(), msg->c_str(), msg->size(), 0);
+	sleep(1);
+
+	if(processInterface->receivedMsg == NULL)
+	{
+		FAIL("Could not receive a correct Message, maybe a timeout happened.");
+	}
+	else
+		STRCMP_EQUAL(msg->c_str(), processInterface->receivedMsg->getContent()->c_str());
+
+	processInterface->reset();
+	delete[] header;
+	delete msg;
+
+}
+
+
+TEST(ComPoint, receiMsg_splittedMsg)
+{
+	char* header = new char[5];
+	string* msg = new string("Hallo das ist eine Testnachricht, welche geteilt übertragen wird.");
+	string subMsg = msg->substr(0, 10);
+	string subMsg2 = msg->substr(10, msg->size());
+	comPoint->createHeader(header, msg->size());
+	send(helper->getClientSocket(), header, 5, 0);
+	send(helper->getClientSocket(), subMsg.c_str(), subMsg.size(), 0);
+	send(helper->getClientSocket(), subMsg2.c_str(), subMsg2.size(), 0);
+	sleep(1);
+
+	if(processInterface->receivedMsg == NULL)
+	{
+		FAIL("Could not receive a correct Message, maybe a timeout happened.");
+	}
+	else
+		STRCMP_EQUAL(msg->c_str(), processInterface->receivedMsg->getContent()->c_str());
+
+	processInterface->reset();
+	delete[] header;
+	delete msg;
+}
+
+
 TEST(ComPoint, receiveMsgwithNoHeader)
 {
 	send(helper->getClientSocket(), "hallo", 5, 0);
@@ -45,6 +126,7 @@ TEST(ComPoint, receiveMsg)
 	send(helper->getClientSocket(), "hallo", 5, 0);
 	sleep(2);
 	CHECK(processInterface->msgReceived);
+	STRCMP_EQUAL("hallo", processInterface->receivedMsg->getContent()->c_str());
 
 	processInterface->reset();
 	delete[] header;

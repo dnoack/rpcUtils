@@ -72,14 +72,6 @@ TEST_GROUP(Plugin_JsonRPC)
 
 
 
-
-
-
-
-
-
-
-
 TEST(Plugin_JsonRPC, responseDOM_ok)
 {
 	Value* id;
