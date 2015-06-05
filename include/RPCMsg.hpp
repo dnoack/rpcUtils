@@ -38,7 +38,7 @@ class RPCMsg{
 			string* content1 = this->getContent();
 			string* content2 = msg2->getContent();
 
-			if (content1->compare(*content2) && this->getSender() == msg2->getSender())
+			if (content1->compare(*content2) == 0 && this->getSender() == msg2->getSender())
 				return true;
 			else
 				return false;
