@@ -8,88 +8,6 @@
 
 #include "ComPointB.hpp"
 
-ComPointB::ComPointB(int socket, ProcessInterfaceB* pInterface, int uniqueID, bool viceVersaRegister)
-{
-	this->currentSocket = socket;
-	this->pInterface = pInterface;
-	this->uniqueID = uniqueID;
-	if(viceVersaRegister)
-		pInterface->setWorkerInterface(this);
-
-	StartWorkerThread();
-
-	if(wait_for_listener_up() != 0)
-		throw Error("Creation of Listener/worker threads failed.");
-	else
-		dlog(logInfo, "Created ComPoint.");
-		//TODO: add some specific information about this compoint
-}
-
-
-ComPointB::~ComPointB()
-{
-	pthread_cancel(getListener());
-	pthread_cancel(getWorker());
-
-	WaitForListenerThreadToExit();
-	WaitForWorkerThreadToExit();
-}
-
-
-void ComPointB::configureLogInfo(LogInformation* in, LogInformation* out, LogInformation* info)
-{
-	logInfoIn.logLevel = in->logLevel;
-	logInfoIn.logName = in->logName;
-
-	logInfoOut.logLevel = out->logLevel;
-	logInfoOut.logName = out->logName;
-
-	logInfo.logLevel = info->logLevel;
-	logInfo.logName = info->logName;
-}
-
-
-void ComPointB::thread_work()
-{
-	worker_thread_active = true;
-	RPCMsg* msg = NULL;
-
-	configSignals();
-	StartListenerThread();
-
-	while(worker_thread_active)
-	{
-		sigwait(&sigmask, &currentSig);
-		switch(currentSig)
-		{
-			case SIGUSR1:
-				while(getReceiveQueueSize() > 0)
-				{
-					try
-					{
-						msg = receiveQueue.back();
-						log(logInfoIn, msg->getContent());
-						popReceiveQueueWithoutDelete();
-						pInterface->processMsg(msg);
-					}
-					catch(Error &e)
-					{
-						dlog(logInfo, "Catched instance of error: %s\n", e.get());
-					}
-					catch(...)
-					{
-						log(logInfo, "Catched unkown Exception.\n");
-					}
-				}
-			break;
-
-			default:
-				log(logInfo, "Received unkown/not supported signal \n");
-				break;
-		}
-	}
-	close(currentSocket);
-}
 
 
 void ComPointB::thread_listen()
@@ -200,24 +118,4 @@ void ComPointB::thread_listen()
 	}
 }
 
-int ComPointB::transmit(const char* data, int size)
-{
-	int sendCount = 0;
-	createHeader(headerOut, size);
-	log(logInfoOut, data);
-	sendCount = send(currentSocket, headerOut, HEADER_SIZE, 0);
-	sendCount += send(currentSocket, data, size, 0);
-	return sendCount;
-};
-
-
-int ComPointB::transmit(RPCMsg* msg)
-{
-	int sendCount = 0;
-	createHeader(headerOut, msg->getContent()->size());
-	log(logInfoOut, msg->getContent());
-	sendCount = send(currentSocket, headerOut, HEADER_SIZE, 0);
-	sendCount += send(currentSocket, msg->getContent()->c_str(), msg->getContent()->size(), 0);
-	return sendCount;
-};
 

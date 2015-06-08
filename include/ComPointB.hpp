@@ -9,41 +9,36 @@
 #define INCLUDE_COMPOINTB_HPP_
 
 
-#define JSON_ERROR_RESPONSE_INCORECCT_MSG "{\"jsonrpc\": \"2.0\", \"error\": {\"code\":  -1, \"message\": \"Received message with invalid packet encoding.\"}, \"id\": 0}"
-
-#include <unistd.h> //close
-#include <sys/socket.h> //send, recv
-#include <pthread.h>
-
-#include "WorkerInterface.hpp"
-#include "RPCMsg.hpp"
-#include "WorkerThreads.hpp"
-#include "LogUnit.hpp"
 #include "ProcessInterfaceB.hpp"
-#include "Error.hpp"
+#include "ComPoint.hpp"
 
-class ComPointB : public WorkerInterface<RPCMsg>, public WorkerThreads, public LogUnit{
+class ComPointB : public ComPoint{
 
 	public:
-		ComPointB(int socket, ProcessInterfaceB* pInterface, int uniqueID, bool viceVersaRegister = true);
+		ComPointB(int socket, ProcessInterfaceB* pInterface, int uniqueID, bool viceVersaRegister = true) :
+			ComPoint(socket, (ProcessInterface*)pInterface, uniqueID, viceVersaRegister, false)
+		{
+			this->pInterface = pInterface;
+			StartWorkerThread();
 
-		virtual ~ComPointB();
+			if(wait_for_listener_up() != 0)
+				throw Error("Creation of Listener/worker threads failed.");
+			else
+				dlog(logInfo, "Created ComPoint.");
+				//TODO: add some specific information about this compoint
+		};
 
-		void configureLogInfo(LogInformation* in, LogInformation* out, LogInformation* info );
+		virtual ~ComPointB(){};
 
-		ProcessInterface* getProcessInterface(){return pInterface;}
+		void startWorking(){StartWorkerThread();}
 
-		int transmit(const char* data, int size);
+		ProcessInterfaceB* getProcessInterface(){return pInterface;}
 
-		int transmit(RPCMsg* rpcMsg);
 
 	private:
 
-		int uniqueID;
-
 		virtual void thread_listen();
 
-		virtual void thread_work();
 
 	private:
 

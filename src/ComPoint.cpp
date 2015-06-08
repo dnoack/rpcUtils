@@ -1,21 +1,23 @@
 #include "ComPoint.hpp"
 
 
-ComPoint::ComPoint(int socket, ProcessInterface* pInterface, int uniqueID, bool viceVersaRegister)
+ComPoint::ComPoint(int socket, ProcessInterface* pInterface, int uniqueID, bool viceVersaRegister, bool startInstant)
 {
 	this->currentSocket = socket;
 	this->pInterface = pInterface;
 	this->uniqueID = uniqueID;
 	if(viceVersaRegister)
 		pInterface->setWorkerInterface(this);
+	if(startInstant)
+	{
+		StartWorkerThread();
 
-	StartWorkerThread();
-
-	if(wait_for_listener_up() != 0)
-		throw Error("Creation of Listener/worker threads failed.");
-	else
-		dlog(logInfo, "Created ComPoint.");
-		//TODO: add some specific information about this compoint
+		if(wait_for_listener_up() != 0)
+			throw Error("Creation of Listener/worker threads failed.");
+		else
+			dlog(logInfo, "Created ComPoint.");
+			//TODO: add some specific information about this compoint
+	}
 }
 
 

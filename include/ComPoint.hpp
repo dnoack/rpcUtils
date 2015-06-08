@@ -26,11 +26,13 @@ class ComPoint : public WorkerInterface<RPCMsg>, public WorkerThreads, public Lo
 
 	public:
 
-		ComPoint(int socket, ProcessInterface* pInterface, int uniqueID, bool viceVersaRegister = true);
+		ComPoint(int socket, ProcessInterface* pInterface, int uniqueID, bool viceVersaRegister = true, bool startInstant = true);
 
 		virtual ~ComPoint();
 
 		void configureLogInfo(LogInformation* in, LogInformation* out, LogInformation* info );
+
+		void startWorking(){StartWorkerThread();}
 
 		ProcessInterface* getProcessInterface(){return pInterface;}
 
