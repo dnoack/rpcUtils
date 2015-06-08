@@ -14,6 +14,7 @@ void ComPointB::thread_listen()
 {
 	listen_thread_active = true;
 	string* content = NULL;
+	RPCMsg* rpcMsg = NULL;
 	pthread_t worker_thread = getWorker();
 
 	FD_ZERO(&rfds);
@@ -50,7 +51,6 @@ void ComPointB::thread_listen()
 							{
 								//add first complete msg of msgbuffer to the receivequeue and signal the worker
 								content = new string(&msgBuffer[HEADER_SIZE], messageSize);
-								printf("isBusy() ?: %d", pInterface->isBusy());
 
 								if(!pInterface->isBusy())
 								{
@@ -59,8 +59,14 @@ void ComPointB::thread_listen()
 								}
 								else
 								{
-									pInterface->setSubMsg(new RPCMsg(uniqueID, content));
-									pthread_kill(worker_thread, SIGUSR2);
+									rpcMsg = new RPCMsg(uniqueID, content);
+									if(pInterface->isSubResponse(rpcMsg))
+										pthread_kill(worker_thread, SIGUSR2);
+									else
+									{
+										push_frontReceiveQueue(rpcMsg);
+										pthread_kill(worker_thread, SIGUSR1);
+									}
 								}
 
 								//Is there more data ?
