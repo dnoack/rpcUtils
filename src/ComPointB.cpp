@@ -1,7 +1,14 @@
-#include "ComPoint.hpp"
+/*
+ * ComPointBB.cpp
+ *
+ *  Created on: 08.06.2015
+ *      Author: dave2
+ */
 
 
-ComPoint::ComPoint(int socket, ProcessInterface* pInterface, int uniqueID, bool viceVersaRegister)
+#include "ComPointB.hpp"
+
+ComPointB::ComPointB(int socket, ProcessInterfaceB* pInterface, int uniqueID, bool viceVersaRegister)
 {
 	this->currentSocket = socket;
 	this->pInterface = pInterface;
@@ -19,19 +26,17 @@ ComPoint::ComPoint(int socket, ProcessInterface* pInterface, int uniqueID, bool 
 }
 
 
-ComPoint::~ComPoint()
+ComPointB::~ComPointB()
 {
 	pthread_cancel(getListener());
 	pthread_cancel(getWorker());
 
 	WaitForListenerThreadToExit();
 	WaitForWorkerThreadToExit();
-
-	close(currentSocket);
 }
 
 
-void ComPoint::configureLogInfo(LogInformation* in, LogInformation* out, LogInformation* info)
+void ComPointB::configureLogInfo(LogInformation* in, LogInformation* out, LogInformation* info)
 {
 	logInfoIn.logLevel = in->logLevel;
 	logInfoIn.logName = in->logName;
@@ -44,7 +49,7 @@ void ComPoint::configureLogInfo(LogInformation* in, LogInformation* out, LogInfo
 }
 
 
-void ComPoint::thread_work()
+void ComPointB::thread_work()
 {
 	worker_thread_active = true;
 	RPCMsg* msg = NULL;
@@ -87,8 +92,7 @@ void ComPoint::thread_work()
 }
 
 
-
-void ComPoint::thread_listen()
+void ComPointB::thread_listen()
 {
 	listen_thread_active = true;
 	string* content = NULL;
@@ -128,9 +132,18 @@ void ComPoint::thread_listen()
 							{
 								//add first complete msg of msgbuffer to the receivequeue and signal the worker
 								content = new string(&msgBuffer[HEADER_SIZE], messageSize);
+								printf("isBusy() ?: %d", pInterface->isBusy());
 
-								push_frontReceiveQueue(new RPCMsg(uniqueID, content));
-								pthread_kill(worker_thread, SIGUSR1);
+								if(!pInterface->isBusy())
+								{
+									push_frontReceiveQueue(new RPCMsg(uniqueID, content));
+									pthread_kill(worker_thread, SIGUSR1);
+								}
+								else
+								{
+									pInterface->setSubMsg(new RPCMsg(uniqueID, content));
+									pthread_kill(worker_thread, SIGUSR2);
+								}
 
 								//Is there more data ?
 								if(msgBufferSize > messageSize+HEADER_SIZE)
@@ -187,8 +200,7 @@ void ComPoint::thread_listen()
 	}
 }
 
-
-int ComPoint::transmit(const char* data, int size)
+int ComPointB::transmit(const char* data, int size)
 {
 	int sendCount = 0;
 	createHeader(headerOut, size);
@@ -199,7 +211,7 @@ int ComPoint::transmit(const char* data, int size)
 };
 
 
-int ComPoint::transmit(RPCMsg* msg)
+int ComPointB::transmit(RPCMsg* msg)
 {
 	int sendCount = 0;
 	createHeader(headerOut, msg->getContent()->size());
@@ -208,6 +220,4 @@ int ComPoint::transmit(RPCMsg* msg)
 	sendCount += send(currentSocket, msg->getContent()->c_str(), msg->getContent()->size(), 0);
 	return sendCount;
 };
-
-
 

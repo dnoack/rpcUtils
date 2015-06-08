@@ -24,7 +24,6 @@ class ProcessInterface{
 			pthread_mutex_init(&busyMutex, NULL);
 			workerInterface = NULL;
 			busy = false;
-			subMsg = NULL;
 		};
 
 
@@ -33,6 +32,8 @@ class ProcessInterface{
 			pthread_mutex_destroy(&processMutex);
 			pthread_mutex_destroy(&busyMutex);
 		};
+
+
 
 		void processMsg(RPCMsg* rpcMsg)
 		{
@@ -63,14 +64,12 @@ class ProcessInterface{
 			this->workerInterface = workerInterface;
 		}
 
-		void setSubMsg(RPCMsg* subMsg){this->subMsg = subMsg;}
-
 
 		bool isBusy()
 		{
 			bool result = false;
 			pthread_mutex_lock(&busyMutex);
-			result = busy;
+			result = this->busy;
 			pthread_mutex_unlock(&busyMutex);
 			return result;
 		}
@@ -79,12 +78,11 @@ class ProcessInterface{
 	protected:
 
 		WorkerInterface<RPCMsg>* workerInterface;
-		RPCMsg* subMsg;
 
 		void setBusy(bool value)
 		{
 			pthread_mutex_lock(&busyMutex);
-			busy = value;
+			this->busy = value;
 			pthread_mutex_unlock(&busyMutex);
 		}
 

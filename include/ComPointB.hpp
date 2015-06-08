@@ -1,12 +1,13 @@
 /*
- * ComPoint.hpp
+ * ComPointB.hpp
  *
- *  Created on: 30.05.2015
- *      Author: Dave
+ *  Created on: 08.06.2015
+ *      Author: dave2
  */
 
-#ifndef COMPOINT_HPP_
-#define COMPOINT_HPP_
+#ifndef INCLUDE_COMPOINTB_HPP_
+#define INCLUDE_COMPOINTB_HPP_
+
 
 #define JSON_ERROR_RESPONSE_INCORECCT_MSG "{\"jsonrpc\": \"2.0\", \"error\": {\"code\":  -1, \"message\": \"Received message with invalid packet encoding.\"}, \"id\": 0}"
 
@@ -18,17 +19,15 @@
 #include "RPCMsg.hpp"
 #include "WorkerThreads.hpp"
 #include "LogUnit.hpp"
-#include "ProcessInterface.hpp"
+#include "ProcessInterfaceB.hpp"
 #include "Error.hpp"
 
-
-class ComPoint : public WorkerInterface<RPCMsg>, public WorkerThreads, public LogUnit{
+class ComPointB : public WorkerInterface<RPCMsg>, public WorkerThreads, public LogUnit{
 
 	public:
+		ComPointB(int socket, ProcessInterfaceB* pInterface, int uniqueID, bool viceVersaRegister = true);
 
-		ComPoint(int socket, ProcessInterface* pInterface, int uniqueID, bool viceVersaRegister = true);
-
-		virtual ~ComPoint();
+		virtual ~ComPointB();
 
 		void configureLogInfo(LogInformation* in, LogInformation* out, LogInformation* info );
 
@@ -38,17 +37,19 @@ class ComPoint : public WorkerInterface<RPCMsg>, public WorkerThreads, public Lo
 
 		int transmit(RPCMsg* rpcMsg);
 
-	protected:
+	private:
 
 		int uniqueID;
 
 		virtual void thread_listen();
+
 		virtual void thread_work();
 
 	private:
 
-		ProcessInterface* pInterface;
-
+		ProcessInterfaceB* pInterface;
 };
 
-#endif /* COMPOINT_HPP_ */
+
+
+#endif /* INCLUDE_COMPOINTB_HPP_ */
