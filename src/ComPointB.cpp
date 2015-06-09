@@ -54,7 +54,6 @@ void ComPointB::thread_listen()
 							{
 								//add first complete msg of msgbuffer to the receivequeue and signal the worker
 								content = new string(&msgBuffer[HEADER_SIZE], messageSize);
-								printf("isBusy() ?: %d\n", pInterface->isBusy());
 
 								if(!pInterface->isBusy())
 								{
@@ -66,13 +65,13 @@ void ComPointB::thread_listen()
 									tempMsg = new RPCMsg(uniqueID, content);
 									if(pInterface->isSubResponse(tempMsg))
 									{
+										log(logInfoIn, tempMsg->getContent());
 										pthread_kill(worker_thread, SIGUSR2);
-										printf("Send signal sigusr2\n");
 									}
 									else
 									{
 										push_frontReceiveQueue(new RPCMsg(tempMsg));
-										// send signal sigusr1 ?
+										//TODO: send signal sigusr1 ?
 									}
 								}
 
