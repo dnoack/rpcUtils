@@ -21,23 +21,11 @@ class ProcessInterfaceB : public ProcessInterface{
 
 
 	public:
-		ProcessInterfaceB()
-		{
-			subMsg = NULL;
-		};
+		ProcessInterfaceB(){};
 
 		virtual ~ProcessInterfaceB(){};
 
-
-		virtual void isSubResponse(RPCMsg* rpcMsg) = 0;
-
-
-		void setSubMsg(RPCMsg* subMsg){this->subMsg = subMsg;}
-
-
-	protected:
-
-		RPCMsg* subMsg;
+		virtual bool isSubResponse(RPCMsg* rpcMsg) = 0;
 
 };
 

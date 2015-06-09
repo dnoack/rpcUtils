@@ -465,6 +465,8 @@ bool JsonRPC::hasResultOrError(Document* dom)
 
 const char* JsonRPC::generateRequest(Value &method, Value &params, Value &id)
 {
+	Value copyId;
+
 	sBuffer.Clear();
 	jsonWriter->Reset(sBuffer);
 
@@ -485,7 +487,10 @@ const char* JsonRPC::generateRequest(Value &method, Value &params, Value &id)
 
 	//if this is a request notification, id is NULL
 	if(&id != NULL)
-		requestDOM->AddMember("id", id, requestDOM->GetAllocator());
+	{
+		copyId.CopyFrom(id, requestDOM->GetAllocator());
+		requestDOM->AddMember("id", copyId, requestDOM->GetAllocator());
+	}
 
 
 	requestDOM->Accept(*jsonWriter);
