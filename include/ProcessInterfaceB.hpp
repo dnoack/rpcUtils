@@ -14,7 +14,6 @@
 #include "RPCMsg.hpp"
 #include "Error.hpp"
 #include "ProcessInterface.hpp"
-#include "WorkerInterface.hpp"
 
 
 class ProcessInterfaceB : public ProcessInterface{

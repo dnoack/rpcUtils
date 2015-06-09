@@ -14,17 +14,10 @@
 #include <cstring>
 
 #include "document.h"
-
 #include "Error.hpp"
 
 using namespace std;
 using namespace rapidjson;
-
-struct _param
-{
-	const char* _name;
-	rapidjson::Type _type;
-};
 
 
 

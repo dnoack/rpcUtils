@@ -9,10 +9,10 @@
 #define PROCESSINTERFACE_HPP_
 
 #include <pthread.h>
-#include "RPCMsg.hpp"
+#include "ComPoint.hpp"
 #include "Error.hpp"
-#include "WorkerInterface.hpp"
 
+class ComPoint;
 
 class ProcessInterface{
 
@@ -22,7 +22,7 @@ class ProcessInterface{
 		{
 			pthread_mutex_init(&processMutex, NULL);
 			pthread_mutex_init(&busyMutex, NULL);
-			workerInterface = NULL;
+			comPoint = NULL;
 			busy = false;
 		};
 
@@ -59,9 +59,9 @@ class ProcessInterface{
 		}
 
 
-		void setWorkerInterface(WorkerInterface<RPCMsg>* workerInterface)
+		void setComPoint(ComPoint* comPoint)
 		{
-			this->workerInterface = workerInterface;
+			this->comPoint = comPoint;
 		}
 
 
@@ -77,7 +77,7 @@ class ProcessInterface{
 
 	protected:
 
-		WorkerInterface<RPCMsg>* workerInterface;
+		ComPoint* comPoint;
 
 		void setBusy(bool value)
 		{

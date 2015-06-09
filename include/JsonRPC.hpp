@@ -17,6 +17,11 @@
 using namespace std;
 using namespace rapidjson;
 
+struct _param
+{
+	const char* _name;
+	rapidjson::Type _type;
+};
 
 
 
