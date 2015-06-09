@@ -14,10 +14,8 @@
 #include <cstring>
 
 #include "document.h"
-#include "writer.h"
 
 #include "Error.hpp"
-#include "JsonRPC.hpp"
 
 using namespace std;
 using namespace rapidjson;
@@ -61,56 +59,6 @@ class DriverInterface{
 		}
 
 
-
-		Value* findObjectMember(Value &object, const char* memberName)
-		{
-			Type paramsType;
-			Value* member;
-
-			paramsType = object.GetType();
-			if(paramsType == kObjectType)
-			{
-				if(object.HasMember(memberName))
-				{
-					member = &(object[memberName]);
-					return member;
-				}
-				else
-					throw Error("Needed member not found.",  __FILE__, __LINE__);
-			}
-			else
-				throw Error("Params is not an Object.",  __FILE__, __LINE__);
-
-		}
-
-
-		//like above but with type check
-		Value* findObjectMember(Value &object, const char* memberName, rapidjson::Type shouldBeType)
-		{
-			Type currentType;
-			Value* member;
-
-			currentType = object.GetType();
-			if(currentType == kObjectType)
-			{
-				if(object.HasMember(memberName))
-				{
-					member = &(object[memberName]);
-					if(member->GetType() == shouldBeType)
-						return member;
-					else
-						throw Error("Member got incorrect type.",  __FILE__, __LINE__);
-				}
-				else
-					throw Error("Needed member not found.",  memberName, __LINE__);
-			}
-			else
-				throw Error("Params is not an Object.",  __FILE__, __LINE__);
-
-		}
-
-
-
 		list<string*>* getAllFunctionNames()
 		{
 			list<string*>* funcList = new list<string*>();
@@ -122,7 +70,6 @@ class DriverInterface{
 			}
 			return funcList;
 		}
-
 
 
 	protected:
@@ -140,7 +87,6 @@ class DriverInterface{
 		map<const char*, TPointer, DriverInterface::cmp_keys> funcMap;
 		TPointer funcP;
 		TDriver driver;
-
 };
 
 

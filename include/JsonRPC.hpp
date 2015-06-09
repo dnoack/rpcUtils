@@ -101,6 +101,8 @@ class JsonRPC {
 		bool hasError(Document* dom);
 		bool hasResultOrError(Document* dom);
 
+		Value* findObjectMember(Value &object, const char* memberName);
+		Value* findObjectMember(Value &object, const char* memberName, rapidjson::Type shouldBeType);
 
 		const char* generateRequest(Value &method, Value &params, Value &id);
 		const char* generateResponse(Value &id, Value &response);

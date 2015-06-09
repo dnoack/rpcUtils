@@ -463,6 +463,53 @@ bool JsonRPC::hasResultOrError(Document* dom)
 }
 
 
+Value* JsonRPC::findObjectMember(Value &object, const char* memberName)
+{
+	Type paramsType;
+	Value* member;
+
+	paramsType = object.GetType();
+	if(paramsType == kObjectType)
+	{
+		if(object.HasMember(memberName))
+		{
+			member = &(object[memberName]);
+			return member;
+		}
+		else
+			throw Error("Needed member not found.",  __FILE__, __LINE__);
+	}
+	else
+		throw Error("Params is not an Object.",  __FILE__, __LINE__);
+
+}
+
+
+//like above but with type check
+Value* JsonRPC::findObjectMember(Value &object, const char* memberName, rapidjson::Type shouldBeType)
+{
+	Type currentType;
+	Value* member;
+
+	currentType = object.GetType();
+	if(currentType == kObjectType)
+	{
+		if(object.HasMember(memberName))
+		{
+			member = &(object[memberName]);
+			if(member->GetType() == shouldBeType)
+				return member;
+			else
+				throw Error("Member got incorrect type.",  __FILE__, __LINE__);
+		}
+		else
+			throw Error("Needed member not found.",  memberName, __LINE__);
+	}
+	else
+		throw Error("Params is not an Object.",  __FILE__, __LINE__);
+}
+
+
 const char* JsonRPC::generateRequest(Value &method, Value &params, Value &id)
 {
 	Value copyId;
