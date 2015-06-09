@@ -10,17 +10,13 @@ ComPoint::ComPoint(int socket, ProcessInterface* pInterface, int uniqueID, bool 
 	pthread_mutex_init(&rQmutex, NULL);
 
 	currentSig = 0;
-	recvSize = 0;
 
 	msgBuffer = NULL;
 	msgBufferSize = 0;
-	oldMsgBufferSize = 0;
 	tempBuffer = NULL;
-	messageSize = 0;
 
-	timeout.tv_sec = 3;
+	timeout.tv_sec = RECV_TIMEOUT;
 	timeout.tv_usec = 0;
-
 
 	deletable = false;
 	logInfoIn.logLevel = 1;
@@ -31,6 +27,8 @@ ComPoint::ComPoint(int socket, ProcessInterface* pInterface, int uniqueID, bool 
 	headerIn = new char[HEADER_SIZE];
 	headerOut = new char[HEADER_SIZE];
 
+	FD_ZERO(&rfds);
+	FD_SET(currentSocket, &rfds);
 
 	memset(receiveBuffer, '\0', BUFFER_SIZE);
 	memset(headerIn, '\0', HEADER_SIZE);
@@ -132,17 +130,15 @@ void ComPoint::thread_work()
 void ComPoint::thread_listen()
 {
 	listen_thread_active = true;
+	int recvSize = 0;
+	int messageSize = 0;
 	string* content = NULL;
 	pthread_t worker_thread = getWorker();
-
-	FD_ZERO(&rfds);
-	FD_SET(currentSocket, &rfds);
 
 	while(listen_thread_active)
 	{
 		memset(receiveBuffer, '\0', BUFFER_SIZE);
 
-		//hier nur hin wenn nichts mehr im buffer ist und auf keine teile einer nachricht gewartet wird.
 		recvSize = recv(currentSocket , receiveBuffer, BUFFER_SIZE, 0);
 		if(recvSize > 0)
 		{
@@ -151,17 +147,16 @@ void ComPoint::thread_listen()
 				msgBufferSize = recvSize;
 				msgBuffer = new char[msgBufferSize];
 				memset(msgBuffer, '\0', msgBufferSize);
-				memcpy(msgBuffer, receiveBuffer, msgBufferSize);
+				memcpy(msgBuffer, receiveBuffer, msgBufferSize); // [data]
 
 				//As long as there is data in the msgBuffer
 				while(msgBufferSize > 0)
 				{
-					//headersize = 1 byte tagfield + 4 byte lengthfield
 					if(msgBufferSize > HEADER_SIZE)
 					{
+						//try to decode the header
 						messageSize = readHeader(msgBuffer);
 
-						//header ok ???
 						if(messageSize > -1)
 						{
 							//Is there at least one complete message in msgBuffer ?
@@ -173,18 +168,19 @@ void ComPoint::thread_listen()
 								push_frontReceiveQueue(new RPCMsg(uniqueID, content));
 								pthread_kill(worker_thread, SIGUSR1);
 
-								//Is there more data ?
+								//Is there more data ? Maybe another message ?
 								if(msgBufferSize > messageSize+HEADER_SIZE)
 								{
-									//copy rest of data to a new clean msgBuffer
+									//copy rest of data to a new clean msgBuffer  [alreadyinQueueMsg | rest of data]
 									msgBufferSize = msgBufferSize - (messageSize+HEADER_SIZE);
 									tempBuffer = new char[msgBufferSize];
 									memset(tempBuffer, '\0', msgBufferSize);
 									memcpy(tempBuffer, &(msgBuffer[messageSize+HEADER_SIZE]), msgBufferSize);
 									delete[] msgBuffer;
-									msgBuffer = tempBuffer;
+									msgBuffer = tempBuffer; //[rest of data]
 									tempBuffer = NULL;
 								}
+								//no further data, delete msgBuffer
 								else
 								{
 									delete[] msgBuffer;
@@ -198,6 +194,7 @@ void ComPoint::thread_listen()
 								waitForFurtherData();
 							}
 						}
+						//Decoding the header failed
 						else
 						{
 							delete[] msgBuffer;
@@ -220,6 +217,7 @@ void ComPoint::thread_listen()
 				msgBufferSize = 0;
 			}
 		}
+		//Error with recv, close listener
 		else
 		{
 			deletable = true;
@@ -254,7 +252,7 @@ int ComPoint::transmit(RPCMsg* msg)
 void ComPoint::createHeader(char* header,  int value)
 {
 	memset(header, '\0', HEADER_SIZE);
-	header[0] = (char)93; // we are wizards
+	header[0] = (char)93; // magic number for identifying the header
 	if(value > 0)
 	{
 		for(int i = HEADER_SIZE-1 ; i > 0 ; i--)
@@ -286,14 +284,15 @@ unsigned int ComPoint::readHeader(char* buffer)
 			value |= temp;
 		}
 	}
-
 	return value;
 }
 
 
-
 void ComPoint::waitForFurtherData()
 {
+	int recvSize = 0;
+	int oldMsgBufferSize = 0;
+
 	//wait for more with select and timeout
 	int retval = select(currentSocket+1, &rfds, NULL, NULL, &timeout);
 	if(retval > 0)
@@ -331,7 +330,7 @@ void ComPoint::waitForFurtherData()
 
 void ComPoint::deleteReceiveQueue()
 {
-	typename list<RPCMsg*>::iterator i;
+	list<RPCMsg*>::iterator i;
 	pthread_mutex_lock(&rQmutex);
 	if(receiveQueue.size() > 0)
 	{
@@ -342,9 +341,9 @@ void ComPoint::deleteReceiveQueue()
 			i = receiveQueue.erase(i);
 		}
 	}
-
 	pthread_mutex_unlock(&rQmutex);
 }
+
 
 void ComPoint::popReceiveQueue()
 {
@@ -356,14 +355,13 @@ void ComPoint::popReceiveQueue()
 	pthread_mutex_unlock(&rQmutex);
 }
 
+
 void ComPoint::popReceiveQueueWithoutDelete()
 {
 	pthread_mutex_lock(&rQmutex);
 		receiveQueue.pop_back();
 	pthread_mutex_unlock(&rQmutex);
 }
-
-
 
 
 void ComPoint::push_backReceiveQueue(RPCMsg* data)
@@ -380,7 +378,6 @@ int ComPoint::getReceiveQueueSize()
 	pthread_mutex_lock(&rQmutex);
 		result = receiveQueue.size();
 	pthread_mutex_unlock(&rQmutex);
-
 	return result;
 }
 
@@ -403,6 +400,3 @@ void ComPoint::deleteBuffer(char* buffer)
 		buffer = NULL;
 	}
 }
-
-
-

@@ -6,15 +6,19 @@
 
 
 #include "RPCMsg.hpp"
-#include "WorkerInterface.hpp"
+#include "ComPoint.hpp"
 
 
-class WorkerInterfaceMock : public WorkerInterface<RPCMsg>{
+class ComPointMock : public ComPoint{
 
 	public:
-		WorkerInterfaceMock();
+		ComPointMock(int socket, ProcessInterface* pInterface, int uniqueID, bool viceVersaRegister = true, bool startInstant = true):
+			ComPoint(socket, pInterface, uniqueID, viceVersaRegister, startInstant)
+		{
+			clear();
+		}
 
-		virtual ~WorkerInterfaceMock();
+		virtual ~ComPointMock();
 
 
 		int transmit(char* data, int size);

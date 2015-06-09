@@ -1,13 +1,13 @@
 #define protected public
 #define private public
 
-#include "ComPoint.hpp"
+#include "ComPointMock.hpp"
 #include "ProcessInterfaceMock.hpp"
 #include "SocketTestHelper.hpp"
 #include "TestHarness.h"
 
 
-static ComPoint* comPoint = NULL;
+static ComPointMock* comPoint = NULL;
 static ProcessInterfaceMock* processInterface = NULL;
 static SocketTestHelper* helper = NULL;
 
@@ -17,7 +17,7 @@ TEST_GROUP(ComPoint)
 	{
 		processInterface = new ProcessInterfaceMock();
 		helper = new SocketTestHelper(AF_UNIX, SOCK_STREAM, "/tmp/test_com.uds");
-		comPoint = new ComPoint(helper->getServerSocket(), processInterface, 0);
+		comPoint = new ComPointMock(helper->getServerSocket(), processInterface, 0);
 	}
 
 	void teardown()
@@ -27,6 +27,122 @@ TEST_GROUP(ComPoint)
 		delete helper;
 	}
 };
+
+
+TEST(ComPoint, waitForFurtherData_and_timeout)
+{
+	SocketTestHelper* helper = new SocketTestHelper(AF_UNIX, SOCK_STREAM, "/tmp/test_com.uds");
+	comPoint->currentSocket = helper->getServerSocket();
+	comPoint->socketToFDSET();
+	//will be deleted by Destructor of interface
+	comPoint->msgBuffer = new char[1024];
+	CHECK_THROWS(Error, comPoint->waitForFurtherData());
+	delete helper;
+}
+
+
+TEST(ComPoint, waitForFurtherData_and_sendit)
+{
+	SocketTestHelper* helper = new SocketTestHelper(AF_UNIX, SOCK_STREAM, "/tmp/test_com.uds");
+	comPoint->currentSocket = helper->getServerSocket();
+	comPoint->socketToFDSET();
+	//will be deleted by Destructor of interface
+	comPoint->msgBuffer = new char[1024];
+
+	send(helper->getClientSocket(), "hallo", 5, 0);
+	comPoint->waitForFurtherData();
+
+	delete helper;
+}
+
+
+TEST(ComPoint, pushMsgs_popWithOutDelete_checkSize)
+{
+	RPCMsg* msg = new RPCMsg(0, "And another message");
+	comPoint->push_frontReceiveQueue(msg);
+	CHECK_EQUAL(1, comPoint->getReceiveQueueSize());
+	comPoint->popReceiveQueueWithoutDelete();
+	CHECK_EQUAL(0, comPoint->getReceiveQueueSize());
+	delete msg;
+}
+
+
+
+TEST(ComPoint, pushMsgs_checkSizeOfQueue_deleteQueue)
+{
+	RPCMsg* msg = new RPCMsg(0, "This is a testmessage");
+	RPCMsg* msg2 = new RPCMsg(0, "Another message");
+
+	comPoint->push_frontReceiveQueue(msg);
+	comPoint->push_backReceiveQueue(msg2);
+	CHECK_EQUAL(2, comPoint->getReceiveQueueSize());
+	comPoint->deleteReceiveQueue();
+}
+
+
+TEST(ComPoint, pushMsg_and_popit)
+{
+	RPCMsg* msg = new RPCMsg(0, "This is a testmessage.");
+	comPoint->push_frontReceiveQueue(msg);
+	comPoint->popReceiveQueue();
+}
+
+
+TEST(ComPoint, makeHeader_negativeValue)
+{
+	int testValue = -30001;
+	char* header = new char[HEADER_SIZE];
+
+	comPoint->createHeader(header, testValue);
+
+	CHECK_EQUAL(0, comPoint->readHeader(header));
+
+	delete[] header;
+
+}
+
+
+TEST(ComPoint, makeHeader_and_convertBack)
+{
+	char* header = new char[HEADER_SIZE];
+
+	comPoint->createHeader(header, 14);
+	CHECK_EQUAL(14, comPoint->readHeader(header));
+	memset(header, '\0', HEADER_SIZE);
+
+	comPoint->createHeader(header, 127);
+	CHECK_EQUAL(127, comPoint->readHeader(header));
+	memset(header, '\0', HEADER_SIZE);
+
+	comPoint->createHeader(header, 144);
+	CHECK_EQUAL(144, comPoint->readHeader(header));
+	memset(header, '\0', HEADER_SIZE);
+
+	comPoint->createHeader(header, 254);
+	CHECK_EQUAL(254, comPoint->readHeader(header));
+	memset(header, '\0', HEADER_SIZE);
+
+
+	comPoint->createHeader(header, 258);
+	CHECK_EQUAL(258, comPoint->readHeader(header));
+	memset(header, '\0', HEADER_SIZE);
+
+	comPoint->createHeader(header, 24567);
+	CHECK_EQUAL(24567, comPoint->readHeader(header));
+	memset(header, '\0', HEADER_SIZE);
+
+
+	delete[] header;
+
+}
+
+
+TEST(ComPoint, convertInt_to_binaryCharArray)
+{
+	char* header = new char[HEADER_SIZE];
+	comPoint->createHeader(header, 1024);
+	delete[] header;
+}
 
 
 

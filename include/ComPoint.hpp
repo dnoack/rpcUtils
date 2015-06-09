@@ -10,10 +10,10 @@
 
 #define JSON_ERROR_RESPONSE_INCORECCT_MSG "{\"jsonrpc\": \"2.0\", \"error\": {\"code\":  -1, \"message\": \"Received message with invalid packet encoding.\"}, \"id\": 0}"
 
-#include <list>
+#include <list> //receiveQueue
 #include <unistd.h> //close
 #include <sys/socket.h> //send, recv
-#include <sys/select.h>
+#include <sys/select.h> //waitForFurtherData
 #include <pthread.h>
 #include "signal.h"
 
@@ -24,11 +24,11 @@
 #include "ProcessInterface.hpp"
 #include "Error.hpp"
 
-#define BUFFER_SIZE 2048 //in byte
-#define TAG_LENGTH  1
-#define LENGTH_LENGTH  4
-#define HEADER_SIZE TAG_LENGTH + LENGTH_LENGTH //in byte
-#define RECV_TIMEOUT 3//in seconds
+#define BUFFER_SIZE 2048 //Size of ReceiveBuffer in size
+#define TAG_LENGTH  1 //Size of TAG-field in byte
+#define LENGTH_LENGTH  4 //Size of LENGTH-field in byte
+#define HEADER_SIZE TAG_LENGTH + LENGTH_LENGTH //Size of complete HEADer in byte
+#define RECV_TIMEOUT 3 //Timeout for Receiving a whole encoded msg in seconds
 
 class ProcessInterface;
 
@@ -52,6 +52,8 @@ class ComPoint :  public WorkerThreads, public LogUnit{
 
 		bool isDeletable(){return deletable;}
 
+
+		//sometimes a processInterface has to analyse data and then put it in queue, so we need it public
 		void push_frontReceiveQueue(RPCMsg* data)
 		{
 			pthread_mutex_lock(&rQmutex);
@@ -61,19 +63,21 @@ class ComPoint :  public WorkerThreads, public LogUnit{
 
 	protected:
 
+		/*! Unique id of this Compoint. If this Compoint is connected to a Plugin, the plugin id is the unique id*/
 		int uniqueID;
 
-		//receivequeue
+		/*!All incomming messages except subResponses are pushed to this queue.*/
 		list<RPCMsg*> receiveQueue;
+		/*! Mutex to protect the receiveQueue, because thread_listen can push and thread_work can pop.*/
 		pthread_mutex_t rQmutex;
 
+		/*! ReceiveBuffer of thread_listen, this buffer has to be big enough.*/
 		char receiveBuffer[BUFFER_SIZE];
-		int recvSize;
+
 		char* msgBuffer;
 		int msgBufferSize;
-		int oldMsgBufferSize;
+
 		char* tempBuffer;
-		int messageSize;
 
 		char* headerIn;
 		char* headerOut;
@@ -88,7 +92,6 @@ class ComPoint :  public WorkerThreads, public LogUnit{
 		sigset_t sigmask;
 		sigset_t origmask;
 		int currentSig;
-
 
 		bool deletable;
 
@@ -108,7 +111,6 @@ class ComPoint :  public WorkerThreads, public LogUnit{
 	private:
 
 		ProcessInterface* pInterface;
-
 
 		void deleteReceiveQueue();
 		void popReceiveQueue();

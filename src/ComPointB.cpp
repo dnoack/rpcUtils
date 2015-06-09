@@ -14,8 +14,11 @@ void ComPointB::thread_listen()
 {
 	listen_thread_active = true;
 	string* content = NULL;
-	pthread_t worker_thread = getWorker();
 	RPCMsg* tempMsg = NULL;
+	int recvSize = 0;
+	int messageSize = 0;
+	pthread_t worker_thread = getWorker();
+
 
 	FD_ZERO(&rfds);
 	FD_SET(currentSocket, &rfds);
