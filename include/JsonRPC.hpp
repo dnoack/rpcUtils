@@ -76,7 +76,6 @@ class JsonRPC {
 
 
 		void parse(Document* dom, string* msg);
-		list<string*>* splitMsg(Document* dom, string* msg);
 
 
 		Value* getParams(Document* dom);

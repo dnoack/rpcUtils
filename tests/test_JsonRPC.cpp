@@ -341,40 +341,6 @@ TEST(Plugin_JsonRPC, tryTogetParams)
 }
 
 
-TEST(Plugin_JsonRPC, splitMsg_FAIL)
-{
-	list<string*>* messages = json->splitMsg(dom, &REQUESTS_WITH_ERROR);
-
-	CHECK_EQUAL(2, messages->size());
-
-	list<string*>::iterator i = messages->begin();
-	while(i != messages->end())
-	{
-		delete *i;
-		i = messages->erase(i);
-	}
-
-	delete messages;
-}
-
-
-TEST(Plugin_JsonRPC, splitMsg_OK)
-{
-
-	list<string*>* messages = json->splitMsg(dom, &THREE_REQUESTS);
-
-	CHECK_EQUAL(3, messages->size());
-
-	list<string*>::iterator i = messages->begin();
-	while(i != messages->end())
-	{
-		delete *i;
-		i = messages->erase(i);
-	}
-
-	delete messages;
-
-}
 
 
 TEST(Plugin_JsonRPC, parse_FAIL)

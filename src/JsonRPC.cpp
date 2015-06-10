@@ -15,37 +15,6 @@ void JsonRPC::parse( Document* dom, string* msg)
 }
 
 
-list<string*>* JsonRPC::splitMsg(Document* dom, string* msg)
-{
-	string* splitMsg = NULL;
-	int splitPos = 0;
-	string* tempString = new string(*msg);
-	list<string*>* msgList = new list<string*>();
-
-	dom->Parse(tempString->c_str());
-
-	if(!dom->HasParseError())
-		msgList->push_back(tempString);
-	else
-	{
-		while(dom->GetParseError() == kParseErrorDocumentRootNotSingular)
-		{
-			splitPos = dom->GetErrorOffset();
-			splitMsg = new string(*tempString, 0, splitPos);
-			tempString->erase(0,splitPos);
-
-			msgList->push_back(splitMsg);
-			dom->Parse(tempString->c_str());
-		}
-		//if there is a parse error or it is the last root of a valid msg/ push it too
-		msgList->push_back(tempString);
-	}
-
-	return msgList;
-}
-
-
-
 Value* JsonRPC::getParam(Document* dom, const char* name)
 {
 	Value* params = NULL;
