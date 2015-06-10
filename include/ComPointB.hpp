@@ -15,8 +15,8 @@
 class ComPointB : public ComPoint{
 
 	public:
-		ComPointB(int socket, ProcessInterfaceB* pInterface, int uniqueID, bool viceVersaRegister = true) :
-			ComPoint(socket, (ProcessInterface*)pInterface, uniqueID, viceVersaRegister, false)
+		ComPointB(int socket, ProcessInterfaceB* pInterface, int uniqueID) :
+			ComPoint(socket, (ProcessInterface*)pInterface, uniqueID, false)
 		{
 			this->pInterface = pInterface;
 			StartWorkerThread();

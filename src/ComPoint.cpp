@@ -1,7 +1,7 @@
 #include "ComPoint.hpp"
 
 
-ComPoint::ComPoint(int socket, ProcessInterface* pInterface, int uniqueID, bool viceVersaRegister, bool startInstant)
+ComPoint::ComPoint(int socket, ProcessInterface* pInterface, int uniqueID, bool startInstant)
 {
 	this->currentSocket = socket;
 	this->pInterface = pInterface;
@@ -34,8 +34,6 @@ ComPoint::ComPoint(int socket, ProcessInterface* pInterface, int uniqueID, bool 
 	memset(headerIn, '\0', HEADER_SIZE);
 	memset(headerOut, '\0', HEADER_SIZE);
 
-	if(viceVersaRegister)
-		pInterface->setComPoint(this);
 
 	if(startInstant)
 	{
@@ -86,7 +84,9 @@ void ComPoint::configureLogInfo(LogInformation* in, LogInformation* out, LogInfo
 void ComPoint::thread_work()
 {
 	worker_thread_active = true;
-	RPCMsg* msg = NULL;
+	RPCMsg* input = NULL;
+	OutgoingMsg* output = NULL;
+	ComPoint* interfaceOut = NULL;
 
 	configSignals();
 	StartListenerThread();
@@ -101,10 +101,23 @@ void ComPoint::thread_work()
 				{
 					try
 					{
-						msg = receiveQueue.back();
-						log(logInfoIn, msg->getContent());
+						input = receiveQueue.back();
+						log(logInfoIn, input->getContent());
 						popReceiveQueueWithoutDelete();
-						pInterface->processMsg(msg);
+						output = pInterface->processMsg(input);
+
+						if(output != NULL)//output can be 0 if we received a notification, so there will be no response !
+						{
+							if(output->getUniqueId() == uniqueID)
+								transmit(output);
+							else
+							{
+								interfaceOut = output->getComPoint();
+								if(interfaceOut != NULL)
+									interfaceOut->transmit(output);
+							}
+							delete output;
+						}
 					}
 					catch(Error &e)
 					{
@@ -164,6 +177,7 @@ void ComPoint::thread_listen()
 							{
 								//add first complete msg of msgbuffer to the receivequeue and signal the worker
 								content = new string(&msgBuffer[HEADER_SIZE], messageSize);
+
 
 								push_frontReceiveQueue(new RPCMsg(uniqueID, content));
 								pthread_kill(worker_thread, SIGUSR1);
@@ -238,13 +252,16 @@ int ComPoint::transmit(const char* data, int size)
 };
 
 
-int ComPoint::transmit(RPCMsg* msg)
+int ComPoint::transmit(OutgoingMsg* output)
 {
 	int sendCount = 0;
-	createHeader(headerOut, msg->getContent()->size());
-	log(logInfoOut, msg->getContent());
+	int msgSize = output->getContent()->size();
+	string* msgContent = output->getContent();
+	log(logInfoOut, msgContent);
+
+	createHeader(headerOut, msgSize);
 	sendCount = send(currentSocket, headerOut, HEADER_SIZE, 0);
-	sendCount += send(currentSocket, msg->getContent()->c_str(), msg->getContent()->size(), 0);
+	sendCount += send(currentSocket, msgContent->c_str(), msgSize, 0);
 	return sendCount;
 };
 
@@ -298,6 +315,8 @@ void ComPoint::waitForFurtherData()
 	if(retval > 0)
 	{
 		recvSize = recv(currentSocket , receiveBuffer, BUFFER_SIZE, 0);
+		if(recvSize < 0)
+			throw Error("Error while waiting for further data.");
 
 		//save the size of the currentMsgbuffer, allocate a bigger buffer for old+ new data
 		oldMsgBufferSize = msgBufferSize;

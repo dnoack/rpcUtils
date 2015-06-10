@@ -31,12 +31,13 @@
 #define RECV_TIMEOUT 3 //Timeout for Receiving a whole encoded msg in seconds
 
 class ProcessInterface;
+class OutgoingMsg;
 
 class ComPoint :  public WorkerThreads, public LogUnit{
 
 	public:
 
-		ComPoint(int socket, ProcessInterface* pInterface, int uniqueID, bool viceVersaRegister = true, bool startInstant = true);
+		ComPoint(int socket, ProcessInterface* pInterface, int uniqueID, bool startInstant = true);
 
 		virtual ~ComPoint();
 
@@ -46,9 +47,11 @@ class ComPoint :  public WorkerThreads, public LogUnit{
 
 		ProcessInterface* getProcessInterface(){return pInterface;}
 
+		int getUniqueID(){return this->uniqueID;}
+
 		int transmit(const char* data, int size);
 
-		int transmit(RPCMsg* rpcMsg);
+		int transmit(OutgoingMsg* output);
 
 		bool isDeletable(){return deletable;}
 

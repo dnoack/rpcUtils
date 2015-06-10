@@ -9,10 +9,10 @@
 #define PROCESSINTERFACE_HPP_
 
 #include <pthread.h>
-#include "ComPoint.hpp"
+#include "RPCMsg.hpp"
+#include "OutgoingMsg.hpp"
 #include "Error.hpp"
 
-class ComPoint;
 
 class ProcessInterface{
 
@@ -22,8 +22,8 @@ class ProcessInterface{
 		{
 			pthread_mutex_init(&processMutex, NULL);
 			pthread_mutex_init(&busyMutex, NULL);
-			comPoint = NULL;
 			busy = false;
+			comPoint = NULL;
 		};
 
 
@@ -34,13 +34,13 @@ class ProcessInterface{
 		};
 
 
-
-		void processMsg(RPCMsg* rpcMsg)
+		OutgoingMsg* processMsg(RPCMsg* input)
 		{
+			OutgoingMsg* output = NULL;
 			pthread_mutex_lock(&processMutex);
 			try
 			{
-				process(rpcMsg);
+				output =  process(input);
 			}
 			catch(Error &e)
 			{
@@ -56,12 +56,7 @@ class ProcessInterface{
 			}
 			//everything is fine
 			pthread_mutex_unlock(&processMutex);
-		}
-
-
-		void setComPoint(ComPoint* comPoint)
-		{
-			this->comPoint = comPoint;
+			return output;
 		}
 
 
@@ -87,13 +82,13 @@ class ProcessInterface{
 		}
 
 
-
 	private:
 		pthread_mutex_t processMutex;
 		pthread_mutex_t busyMutex;
 		bool busy;
 
-		virtual void process(RPCMsg* rpcMsg) = 0;
+
+		virtual OutgoingMsg* process(RPCMsg* rpcMsg) = 0;
 
 };
 
