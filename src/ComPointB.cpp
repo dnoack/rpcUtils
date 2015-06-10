@@ -31,7 +31,8 @@ void ComPointB::thread_listen()
 		recvSize = recv(currentSocket , receiveBuffer, BUFFER_SIZE, 0);
 		if(recvSize > 0)
 		{
-			try{
+			try
+			{
 				//copy receiveBuffer to a clean msgBuffer
 				msgBufferSize = recvSize;
 				msgBuffer = new char[msgBufferSize];
@@ -73,7 +74,6 @@ void ComPointB::thread_listen()
 										push_frontReceiveQueue(new RPCMsg(tempMsg));
 										//TODO: send signal sigusr1 ?
 									}
-								}
 
 								//Is there more data ?
 								if(msgBufferSize > messageSize+HEADER_SIZE)
@@ -94,8 +94,8 @@ void ComPointB::thread_listen()
 									msgBufferSize = 0;
 								}
 							}
-							//message is not complete, wait for the rest
-							else
+							}
+							else//message is not complete, wait for the rest
 							{
 								waitForFurtherData();
 							}

@@ -24,6 +24,8 @@ class ProcessInterfaceB : public ProcessInterface{
 
 		virtual ~ProcessInterfaceB(){};
 
+
+
 		virtual bool isSubResponse(RPCMsg* rpcMsg) = 0;
 
 };
