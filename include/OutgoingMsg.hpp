@@ -9,42 +9,32 @@
 #define INCLUDE_OUTGOINGMSG_HPP_
 
 #include "stdio.h"
-#include "ComPoint.hpp"
+#include "RPCMsg.hpp"
 
 using namespace std;
 
-class ComPoint;
 
-class OutgoingMsg{
+class OutgoingMsg : public RPCMsg{
 
 	public:
-		OutgoingMsg(string* content, int uniqueId, ComPoint* comPoint = NULL)
+		OutgoingMsg(ComPoint* destination, string* content )
 		{
+			//outgoingmsg content will be copied
 			this->content = new string(*content);
-			this->uniqueId = uniqueId;
-			this->comPoint = comPoint;
-		}
+			this->comPoint = destination;
+		};
 
-		OutgoingMsg(const char* content, int uniqueId, ComPoint* comPoint = NULL)
+		OutgoingMsg(ComPoint* destination, const char* content )
 		{
 			this->content = new string(content);
-			this->uniqueId = uniqueId;
-			this->comPoint = comPoint;
-		}
+			this->comPoint = destination;
+		};
 
-		virtual ~OutgoingMsg()
-		{
-			delete content;
-		}
+		virtual ~OutgoingMsg(){}
 
 		string* getContent(){return this->content;}
-		int getUniqueId(){return this->uniqueId;}
-		ComPoint* getComPoint(){return this->comPoint;}
+		ComPoint* getDestination(){return this->comPoint;}
 
-	private:
-		string* content;
-		int uniqueId;
-		ComPoint* comPoint;
 };
 
 

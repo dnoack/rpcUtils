@@ -24,7 +24,7 @@ class ProcessInterfaceB : public ProcessInterface{
 
 		virtual ~ProcessInterfaceB(){};
 
-
+		void setComPoint(ComPoint* comPoint){this->comPoint = comPoint;}
 
 		virtual bool isSubResponse(RPCMsg* rpcMsg) = 0;
 

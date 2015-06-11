@@ -84,7 +84,7 @@ void ComPoint::configureLogInfo(LogInformation* in, LogInformation* out, LogInfo
 void ComPoint::thread_work()
 {
 	worker_thread_active = true;
-	RPCMsg* input = NULL;
+	IncomingMsg* input = NULL;
 	OutgoingMsg* output = NULL;
 	ComPoint* interfaceOut = NULL;
 
@@ -101,20 +101,19 @@ void ComPoint::thread_work()
 				{
 					try
 					{
-						input = receiveQueue.back();
+						input = (IncomingMsg*)receiveQueue.back();
 						log(logInfoIn, input->getContent());
 						popReceiveQueueWithoutDelete();
 						output = pInterface->processMsg(input);
 
 						if(output != NULL)//output can be 0 if we received a notification, so there will be no response !
 						{
-							if(output->getUniqueId() == uniqueID)
-								transmit(output);
+							interfaceOut = output->getComPoint();
+							if(interfaceOut != NULL)
+								interfaceOut->transmit(output);
 							else
 							{
-								interfaceOut = output->getComPoint();
-								if(interfaceOut != NULL)
-									interfaceOut->transmit(output);
+								//TODO: error
 							}
 							delete output;
 						}
@@ -179,7 +178,7 @@ void ComPoint::thread_listen()
 								content = new string(&msgBuffer[HEADER_SIZE], messageSize);
 
 
-								push_frontReceiveQueue(new RPCMsg(uniqueID, content));
+								push_frontReceiveQueue(new IncomingMsg(this, content));
 								pthread_kill(worker_thread, SIGUSR1);
 
 								//Is there more data ? Maybe another message ?

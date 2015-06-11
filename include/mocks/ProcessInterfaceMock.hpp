@@ -17,28 +17,33 @@ class ProcessInterfaceMock : public ProcessInterface
 		ProcessInterfaceMock()
 		{
 			msgReceived = false;
-			receivedMsg = NULL;
+			input = NULL;
+			output = NULL;
 		};
 
 		virtual ~ProcessInterfaceMock(){};
 
 
-		bool msgReceived;
-		RPCMsg* receivedMsg;
-
 		void reset()
 		{
 			msgReceived = false;
-			delete receivedMsg;
+			delete output;
 		}
+
+		string* getReceivedData(){return output->getContent();}
 
 	private:
 
+		OutgoingMsg* output;
+		IncomingMsg* input;
+		bool msgReceived;
 
-		void process(RPCMsg* msg)
+		OutgoingMsg* process(IncomingMsg* input)
 		{
-			receivedMsg = msg;
+		    output = new OutgoingMsg(input->getOrigin(), input->getContent());
+		    delete input;
 			msgReceived = true;
+			return NULL;
 		}
 };
 

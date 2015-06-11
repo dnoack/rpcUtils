@@ -10,66 +10,64 @@
 
 #include <string>
 
+#define TCP_SIDE 0
+#define IPC_SIDE 1
+
 using namespace std;
+
+class ComPoint;
 
 class RPCMsg{
 
 	public:
-		RPCMsg(int sender, string* content);
-
-		RPCMsg(int sender, const char* content);
-
-
-		/**
-		 * Copy constructor.
-		 */
-		RPCMsg(RPCMsg* msg);
-
-		virtual ~RPCMsg();
-
-
-		/**
-		 * Overloaded operator == for comparing two messages.
-		 * \msg2 The other message which will be compared with the instance of this one.
-		 * \return Returns true if both messages are equal, false instead.
-		 */
-		bool operator==(RPCMsg* msg2)
+		RPCMsg()
 		{
-			string* content1 = this->getContent();
-			string* content2 = msg2->getContent();
+			this->comPoint = NULL;
+			this->content = NULL;
+			this->jsonRpcId = 0;
+		};
 
-			if (content1->compare(*content2) == 0 && this->getSender() == msg2->getSender())
-				return true;
-			else
-				return false;
-		}
+		RPCMsg(ComPoint* comPoint, string* content)
+		{
+			this->comPoint = comPoint;
+			this->content = content;
+			this->jsonRpcId = 0;
+		};
+
+		RPCMsg(ComPoint* comPoint, const char* content)
+		{
+			this->comPoint = comPoint;
+			this->content = new string(content);
+			this->jsonRpcId = 0;
+		};
+
+		RPCMsg(RPCMsg* rpcMsg)
+		{
+			this->comPoint = rpcMsg->getComPoint();
+			this->content = new string(rpcMsg->getContent()->c_str(), rpcMsg->getContent()->size());
+			this->jsonRpcId = rpcMsg->getJsonRpcId();
+		};
+
+		virtual ~RPCMsg()
+		{
+			delete content;
+		};
 
 
-		/**
-		 * \return Sender id of this message.
-		 */
-		int getSender(){return this->sender;}
-
-		/**
-		 * \return Content of this message as a pointer to std::string.
-		 */
 		string* getContent(){return this->content;}
+		ComPoint* getComPoint(){return this->comPoint;}
+		bool isOriginTcp();
 
 		int getJsonRpcId(){return this->jsonRpcId;}
 		void setJsonRpcId(int jsonRpcId){this->jsonRpcId = jsonRpcId;}
 
 
-	private:
-		/*! Sender id which is 0 for tcp clients and greater 0 for plugins.*/
-		int sender;
+	protected:
 		/*! This is the proper message, hopefully containing a valid json rpc message.*/
 		string* content;
-
+		ComPoint* comPoint;
 		int jsonRpcId;
-
-
 };
-
 
 
 #endif /* RPCMSG_HPP_ */

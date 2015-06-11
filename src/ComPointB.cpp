@@ -55,15 +55,15 @@ void ComPointB::thread_listen()
 							{
 								//add first complete msg of msgbuffer to the receivequeue and signal the worker
 								content = new string(&msgBuffer[HEADER_SIZE], messageSize);
+								tempMsg = new IncomingMsg(this, content);
 
 								if(!pInterface->isBusy())
 								{
-									push_frontReceiveQueue(new RPCMsg(uniqueID, content));
+									push_frontReceiveQueue(tempMsg);
 									pthread_kill(worker_thread, SIGUSR1);
 								}
 								else
 								{
-									tempMsg = new RPCMsg(uniqueID, content);
 									if(pInterface->isSubResponse(tempMsg))
 									{
 										log(logInfoIn, tempMsg->getContent());
@@ -71,10 +71,10 @@ void ComPointB::thread_listen()
 									}
 									else
 									{
-										push_frontReceiveQueue(new RPCMsg(tempMsg));
+										push_frontReceiveQueue(tempMsg);
 										//TODO: send signal sigusr1 ?
 									}
-
+								}
 								//Is there more data ?
 								if(msgBufferSize > messageSize+HEADER_SIZE)
 								{
@@ -94,7 +94,7 @@ void ComPointB::thread_listen()
 									msgBufferSize = 0;
 								}
 							}
-							}
+
 							else//message is not complete, wait for the rest
 							{
 								waitForFurtherData();

@@ -1,32 +1,22 @@
+/*
+ * RPCMsg.cpp
+ *
+ *  Created on: 11.06.2015
+ *      Author: dave2
+ */
 
 #include "RPCMsg.hpp"
+#include "ComPoint.hpp"
 
-
-RPCMsg::RPCMsg(int sender, string* content)
+bool RPCMsg::isOriginTcp()
 {
-	this->sender = sender;
-	this->content = content;
-	this->jsonRpcId = 0;
-};
-
-
-RPCMsg::RPCMsg(int sender, const char* content)
-{
-	this->sender = sender;
-	this->content = new string(content);
-	this->jsonRpcId = 0;
-};
-
-
-RPCMsg::RPCMsg(RPCMsg* msg)
-{
-	this->sender = msg->getSender();
-	this->content = new string(msg->getContent()->c_str(), msg->getContent()->size());
-	this->jsonRpcId = msg->getJsonRpcId();
+	bool result = false;
+	if(comPoint != NULL)
+	{
+		if(comPoint->getUniqueID() == TCP_SIDE)
+			result = true;
+	}
+	return result;
 }
 
 
-RPCMsg::~RPCMsg()
-{
-	delete content;
-};

@@ -161,12 +161,8 @@ TEST(ComPoint, receiveMsg_everythingSplitted)
 	send(helper->getClientSocket(), subMsg2.c_str(), subMsg2.size(), 0);
 	sleep(1);
 
-	if(processInterface->receivedMsg == NULL)
-	{
-		FAIL("Could not receive a correct Message, maybe a timeout happened.");
-	}
-	else
-		STRCMP_EQUAL(msg->c_str(), processInterface->receivedMsg->getContent()->c_str());
+
+	STRCMP_EQUAL(msg->c_str(), processInterface->getReceivedData()->c_str());
 
 	processInterface->reset();
 	delete[] header;
@@ -187,12 +183,8 @@ TEST(ComPoint, receiveMsg_splittedHeader)
 	send(helper->getClientSocket(), msg->c_str(), msg->size(), 0);
 	sleep(1);
 
-	if(processInterface->receivedMsg == NULL)
-	{
-		FAIL("Could not receive a correct Message, maybe a timeout happened.");
-	}
-	else
-		STRCMP_EQUAL(msg->c_str(), processInterface->receivedMsg->getContent()->c_str());
+
+	STRCMP_EQUAL(msg->c_str(), processInterface->getReceivedData()->c_str());
 
 	processInterface->reset();
 	delete[] header;
@@ -213,12 +205,8 @@ TEST(ComPoint, receiMsg_splittedMsg)
 	send(helper->getClientSocket(), subMsg2.c_str(), subMsg2.size(), 0);
 	sleep(1);
 
-	if(processInterface->receivedMsg == NULL)
-	{
-		FAIL("Could not receive a correct Message, maybe a timeout happened.");
-	}
-	else
-		STRCMP_EQUAL(msg->c_str(), processInterface->receivedMsg->getContent()->c_str());
+
+	STRCMP_EQUAL(msg->c_str(), processInterface->getReceivedData()->c_str());
 
 	processInterface->reset();
 	delete[] header;
@@ -240,9 +228,10 @@ TEST(ComPoint, receiveMsg)
 	comPoint->createHeader(header, 5);
 	send(helper->getClientSocket(), header, 5, 0);
 	send(helper->getClientSocket(), "hallo", 5, 0);
-	sleep(2);
-	CHECK(processInterface->msgReceived);
-	STRCMP_EQUAL("hallo", processInterface->receivedMsg->getContent()->c_str());
+
+	sleep(1);
+	STRCMP_EQUAL("hallo", processInterface->getReceivedData()->c_str());
+
 
 	processInterface->reset();
 	delete[] header;

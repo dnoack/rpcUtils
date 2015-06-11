@@ -19,6 +19,7 @@ class ComPointB : public ComPoint{
 			ComPoint(socket, (ProcessInterface*)pInterface, uniqueID, false)
 		{
 			this->pInterface = pInterface;
+			pInterface->setComPoint(this); //important for the ability of sending subresponses
 			StartWorkerThread();
 
 			if(wait_for_listener_up() != 0)

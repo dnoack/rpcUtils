@@ -8,8 +8,8 @@
 #ifndef PROCESSINTERFACE_HPP_
 #define PROCESSINTERFACE_HPP_
 
+#include <IncomingMsg.hpp>
 #include <pthread.h>
-#include "RPCMsg.hpp"
 #include "OutgoingMsg.hpp"
 #include "Error.hpp"
 
@@ -34,7 +34,7 @@ class ProcessInterface{
 		};
 
 
-		OutgoingMsg* processMsg(RPCMsg* input)
+		OutgoingMsg* processMsg(IncomingMsg* input)
 		{
 			OutgoingMsg* output = NULL;
 			pthread_mutex_lock(&processMutex);
@@ -88,7 +88,7 @@ class ProcessInterface{
 		bool busy;
 
 
-		virtual OutgoingMsg* process(RPCMsg* rpcMsg) = 0;
+		virtual OutgoingMsg* process(IncomingMsg* input) = 0;
 
 };
 

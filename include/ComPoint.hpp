@@ -18,11 +18,12 @@
 #include "signal.h"
 
 
-#include "RPCMsg.hpp"
 #include "WorkerThreads.hpp"
 #include "LogUnit.hpp"
 #include "ProcessInterface.hpp"
 #include "Error.hpp"
+#include "RPCMsg.hpp"
+#include "OutgoingMsg.hpp"
 
 #define BUFFER_SIZE 2048 //Size of ReceiveBuffer in size
 #define TAG_LENGTH  1 //Size of TAG-field in byte
@@ -31,7 +32,9 @@
 #define RECV_TIMEOUT 3 //Timeout for Receiving a whole encoded msg in seconds
 
 class ProcessInterface;
+class RPCMsg;
 class OutgoingMsg;
+
 
 class ComPoint :  public WorkerThreads, public LogUnit{
 
