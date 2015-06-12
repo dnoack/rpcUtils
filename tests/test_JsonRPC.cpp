@@ -171,6 +171,39 @@ TEST(Plugin_JsonRPC, hasResult_OK)
 }
 
 
+TEST(Plugin_JsonRPC, id_is_NumberString)
+{
+	string idIsNumberString = "{\"jsonrpc\": \"2.0\", \"params\": { \"handle\": 1}, \"method\": \"aa_close\", \"id\": \"342\"}";
+	json->parse(dom, &idIsNumberString);
+	CHECK(json->hasId(dom));
+}
+
+
+TEST(Plugin_JsonRPC, id_is_randomString)
+{
+	string idIsNULL = "{\"jsonrpc\": \"2.0\", \"params\": { \"handle\": 1}, \"method\": \"aa_close\", \"id\": \"342asdf\"}";
+	json->parse(dom, &idIsNULL);
+	CHECK_THROWS(Error, json->hasId(dom));
+}
+
+
+TEST(Plugin_JsonRPC, id_is_NULL_string)
+{
+	string idIsNULL = "{\"jsonrpc\": \"2.0\", \"params\": { \"handle\": 1}, \"method\": \"aa_close\", \"id\": \"NULL\"}";
+	json->parse(dom, &idIsNULL);
+	CHECK_THROWS(Error, json->hasId(dom));
+}
+
+
+TEST(Plugin_JsonRPC, id_is_fractional)
+{
+	string idIsFractional = "{\"jsonrpc\": \"2.0\", \"params\": { \"handle\": 1}, \"method\": \"aa_close\", \"id\": 23.5}";
+	json->parse(dom, &idIsFractional);
+	CHECK_THROWS(Error, json->hasId(dom));
+}
+
+
+
 TEST(Plugin_JsonRPC, hasNoMemberId_FAIL)
 {
 	json->parse(dom, &REQUEST);
@@ -190,7 +223,6 @@ TEST(Plugin_JsonRPC, hasMemberId_FAIL)
 	string idNOTAvailable = "{\"jsonrpc\": \"2.0\", \"params\": { \"handle\": 1}, \"method\": \"aa_close\"}";
 	json->parse(dom, &idNOTAvailable);
 	CHECK_THROWS(Error, json->hasId(dom));
-
 }
 
 

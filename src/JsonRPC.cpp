@@ -323,14 +323,29 @@ bool JsonRPC::hasParams(Document* dom)
 bool JsonRPC::hasId(Document* dom)
 {
 	bool result = false;
+	Value* id = NULL;
 
 	//TODO: check: normally not NULL, no fractional pars
 	try
 	{
 		if(dom->HasMember("id"))
 		{
-			if((*dom)["id"].IsInt() || (*dom)["id"].IsString())
+			id = &(*dom)["id"];
+
+			//id can be either int
+			if(id->IsInt())
+			{
 				result = true;
+			}
+			else if(id->IsString())
+			{
+				if(strcmp(id->GetString(), "NULL") == 0)
+					throw Error(-32033, "NULL for Member -id- is not allowed.");
+				else if(!isNumber(id->GetString()))
+					throw Error(-32034, "Member -id- has to be a number.");
+				else
+					result = true;
+			}
 			else
 				throw Error(-32031, "Member -id- has to be an integer or a string.");
 		}
@@ -345,12 +360,18 @@ bool JsonRPC::hasId(Document* dom)
 	return result;
 }
 
+bool JsonRPC::isNumber(const char* s)
+{
+	char* pos = NULL;
+	strtol(s, &pos, 10);
+	return (*pos == 0);
+}
+
 
 bool JsonRPC::hasNoId(Document* dom)
 {
 	bool result = false;
 
-	//TODO: check: normally not NULL, no fractional pars
 	try
 	{
 		if(!dom->HasMember("id"))
