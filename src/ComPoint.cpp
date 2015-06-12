@@ -1,5 +1,19 @@
 #include "ComPoint.hpp"
 
+ComPoint::ComPoint()
+{
+	this->currentSocket = 0;
+	this->pInterface = NULL;
+	this->uniqueID = 0;
+	currentSig = 0;
+	msgBuffer = NULL;
+	msgBufferSize = 0;
+	tempBuffer = NULL;
+	headerIn = new char[HEADER_SIZE];
+	headerOut = new char[HEADER_SIZE];
+	deletable = false;
+}
+
 
 ComPoint::ComPoint(int socket, ProcessInterface* pInterface, int uniqueID, bool startInstant)
 {

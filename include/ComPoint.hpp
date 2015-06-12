@@ -40,6 +40,9 @@ class ComPoint :  public WorkerThreads, public LogUnit{
 
 	public:
 
+		//for testing purpose
+		ComPoint();
+
 		ComPoint(int socket, ProcessInterface* pInterface, int uniqueID, bool startInstant = true);
 
 		virtual ~ComPoint();

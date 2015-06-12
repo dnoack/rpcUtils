@@ -30,14 +30,14 @@ TEST(Error, constructor_with_string)
 }
 
 
-TEST(Error, constructor_wirht_errorCode_and_msg_and_info)
+TEST(Error, constructor_with_errorCode_and_msg_and_info)
 {
-	const char* msg = "This is a error message without extra information";
+	const char* msg = "This is a error message with extra information: %s";
 	int errorNumber = -3005;
 	const char* info = "This could be a errno information.";
 	Error* error = new Error(errorNumber, msg, info);
 
-	STRCMP_EQUAL("This is a error message without extra information - errno: This could be a errno information." , error->get());
+	STRCMP_EQUAL("This is a error message with extra information: This could be a errno information." , error->get());
 	CHECK_EQUAL(errorNumber, error->getErrorCode());
 	delete error;
 }

@@ -3,10 +3,12 @@
 #define INCLUDE_ERROR_HPP_
 
 #define LINEBUFFER_SIZE 64
+#define ARGUMENT_BUFFER_SIZE 2048
 
 #include <exception>
 #include <string>
 #include <sstream>
+#include <stdarg.h>
 #include <iostream>
 #include <stdio.h>
 #include <cstring>
@@ -32,31 +34,37 @@ class Error : exception{
 		}
 
 
-		Error(const char* msg)
-		{
-			this->errorCode = 0;
-			this->exMsg = new string(msg);
-		}
-
-		Error(int errorCode, const char* msg)
-		{
-			this->errorCode = errorCode;
-			this->exMsg = new string(msg);
-		}
-
-		Error(int errorCode, const char* msg, const char* errnoMsg)
-		{
-			this->errorCode = errorCode;
-			this->exMsg = new string(msg);
-			this->exMsg->append(" - errno: ");
-			this->exMsg->append(errnoMsg);
-		}
-
 
 		Error(string* msg)
 		{
 			this->errorCode = 0;
 			this->exMsg = new string(*msg);
+		}
+
+
+		Error(const char* msg, ...)
+		{
+			va_list arguments;
+			memset(argumentBuffer, '\0', ARGUMENT_BUFFER_SIZE);
+			this->errorCode = 0;
+
+			va_start(arguments, msg);
+			vsnprintf(argumentBuffer, ARGUMENT_BUFFER_SIZE, msg, arguments);
+			this->exMsg = new string(argumentBuffer);
+			va_end(arguments);
+		}
+
+
+		Error(int errorCode, const char* msg, ...)
+		{
+			va_list arguments;
+			memset(argumentBuffer, '\0', ARGUMENT_BUFFER_SIZE);
+			this->errorCode = errorCode;
+
+			va_start(arguments, msg);
+			vsnprintf(argumentBuffer, ARGUMENT_BUFFER_SIZE, msg, arguments);
+			this->exMsg = new string(argumentBuffer);
+			va_end(arguments);
 		}
 
 
@@ -80,7 +88,7 @@ class Error : exception{
 		string* exMsg;
 		int errorCode;
 		char lineBuffer[LINEBUFFER_SIZE];
-
+		char argumentBuffer[ARGUMENT_BUFFER_SIZE];
 };
 
 #endif /* INCLUDE_ERROR_HPP_ */
