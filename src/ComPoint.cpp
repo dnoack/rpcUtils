@@ -9,7 +9,7 @@ ComPoint::ComPoint()
 	msgBuffer = NULL;
 	msgBufferSize = 0;
 	tempBuffer = NULL;
-	headerIn = new char[HEADER_SIZE];
+	//headerIn = new char[HEADER_SIZE];
 	headerOut = new char[HEADER_SIZE];
 	deletable = false;
 }
@@ -38,14 +38,12 @@ ComPoint::ComPoint(int socket, ProcessInterface* pInterface, int uniqueID, bool 
 	logInfoOut.logLevel = 2;
 	logInfoOut.logName = "";
 
-	headerIn = new char[HEADER_SIZE];
 	headerOut = new char[HEADER_SIZE];
 
 	FD_ZERO(&rfds);
 	FD_SET(currentSocket, &rfds);
 
 	memset(receiveBuffer, '\0', BUFFER_SIZE);
-	memset(headerIn, '\0', HEADER_SIZE);
 	memset(headerOut, '\0', HEADER_SIZE);
 
 
@@ -64,7 +62,6 @@ ComPoint::ComPoint(int socket, ProcessInterface* pInterface, int uniqueID, bool 
 
 ComPoint::~ComPoint()
 {
-	delete[] headerIn;
 	delete[] headerOut;
 
 	pthread_cancel(getListener());
@@ -198,7 +195,7 @@ void ComPoint::thread_listen()
 								//Is there more data ? Maybe another message ?
 								if(msgBufferSize > messageSize+HEADER_SIZE)
 								{
-									//copy rest of data to a new clean msgBuffer  [alreadyinQueueMsg | rest of data]
+									//copy rest of data to a new clean msgBuffer  [alreadyInQueueMsg | rest of data]
 									msgBufferSize = msgBufferSize - (messageSize+HEADER_SIZE);
 									tempBuffer = new char[msgBufferSize];
 									memset(tempBuffer, '\0', msgBufferSize);
