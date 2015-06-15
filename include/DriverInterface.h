@@ -1,10 +1,3 @@
-/*
- * Plugin_Interface.h
- *
- *  Created on: 21.01.2015
- *      Author: dnoack
- */
-
 #ifndef DRIVERINTERFACE_H_
 #define DRIVERINTERFACE_H_
 
@@ -43,7 +36,7 @@ class DriverInterface{
 		};
 
 		/** Base-Destructor.*/
-		~DriverInterface()
+		virtual ~DriverInterface()
 		{
 			funcMap.clear();
 		};

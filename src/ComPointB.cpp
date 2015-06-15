@@ -1,13 +1,4 @@
-/*
- * ComPointBB.cpp
- *
- *  Created on: 08.06.2015
- *      Author: dave2
- */
-
-
 #include "ComPointB.hpp"
-
 
 
 void ComPointB::thread_listen()
