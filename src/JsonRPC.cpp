@@ -1,9 +1,6 @@
-
 #include "stdio.h"
 #include <JsonRPC.hpp>
 #include "Error.hpp"
-
-
 
 
 void JsonRPC::parse( Document* dom, string* msg)
@@ -25,7 +22,6 @@ Value* JsonRPC::getParam(Document* dom, const char* name)
 
 	return result;
 }
-
 
 
 Value* JsonRPC::tryTogetParam(Document* dom, const char* name)
