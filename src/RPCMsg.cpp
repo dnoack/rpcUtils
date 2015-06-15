@@ -1,12 +1,6 @@
-/*
- * RPCMsg.cpp
- *
- *  Created on: 11.06.2015
- *      Author: dave2
- */
-
 #include "RPCMsg.hpp"
 #include "ComPoint.hpp"
+
 
 bool RPCMsg::isOriginTcp()
 {
@@ -18,5 +12,3 @@ bool RPCMsg::isOriginTcp()
 	}
 	return result;
 }
-
-
