@@ -12,9 +12,9 @@ using namespace std;
 /**
  * class Plugin
  * Contains information about a real plugin. This information contains the
- * name, pluginNumber, path to the unix domain socket file and all known methods by
+ * name, pluginNumber, path to the unix domain socket file and all known methods with their
  * full name. With the information of a plugin instance , it is possible to create a
- * valid instance of UdsComClient which is a connection to this plugin.
+ * instance of ComPoint which is a connection to this plugin.
  */
 class Plugin{
 
@@ -35,6 +35,10 @@ class Plugin{
 			comPoint = NULL;
 		}
 
+		/**
+		 * Copy-Constructor.
+		 * \param plugin The plugin instance which should be copied.
+		 */
 		Plugin(Plugin* plugin)
 		{
 			this->name = new string(*(plugin->getName()));
@@ -55,8 +59,12 @@ class Plugin{
 				delete comPoint;
 		}
 
+		/** \return Return the corresponding ComPoint instance, or NULL if not set.*/
 		ComPoint* getComPoint(){return this->comPoint;}
 
+		/** Sets a corresponding ComPoint for the plugin.
+		 * \param comPoint Instance of ComPoint for the plugin.
+		 */
 		void setComPoint(ComPoint* comPoint)
 		{
 			this->comPoint = comPoint;
@@ -74,26 +82,18 @@ class Plugin{
 			methods.push_back(methodName);
 		}
 
-		/**
-		 * \return The unique pluginName.
-		 */
+		/** \return The unique pluginName.*/
 		string* getName(){return this->name;}
 
-		/**
-		 * \return The path to the unix domain socket file.
-		 */
+		/** \return The path to the unix domain socket file.*/
 		string* getUdsFilePath(){return this->udsFilePath;}
 
 
-		/**
-		 * \return The unique pluginNumber.
-		 */
+		/** \return The unique pluginNumber.*/
 		int getPluginNumber(){return this->pluginNumber;}
 
 
-		/**
-		 * \return Return a pointer to the intern list of string*, which contains all known methodnames.
-		 */
+		/** \return Return a pointer to the intern list of string*, which contains all known methodnames.*/
 		list<string*>* getMethods(){return &(this->methods);}
 
 
@@ -128,7 +128,6 @@ class Plugin{
 			}
 		}
 };
-
 
 
 #endif /* INCLUDE_PLUGIN_HPP_ */
