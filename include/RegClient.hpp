@@ -10,6 +10,7 @@
 #include <cstdio>
 #include <list>
 #include <pthread.h>
+#include <PluginInfo.hpp>
 #include <RPCInterface.hpp>
 #include "signal.h"
 #include <string>
@@ -18,7 +19,6 @@
 #include "JsonRPC.hpp"
 #include "RPCMsg.hpp"
 #include "OutgoingMsg.hpp"
-#include "Plugin.hpp"
 #include "Error.hpp"
 
 using namespace std;
@@ -44,7 +44,7 @@ class RegClient : public ProcessInterface{
 		 * \param rpcClass
 		 * \param regPath Path to unix domain socket file for registring a plugin to RSD.
 		 */
-		RegClient(Plugin* plugin, list<string*>* functionList, const char* regPath);
+		RegClient(PluginInfo* plugin, list<string*>* functionList, const char* regPath);
 
 		/**
 		 * Destructor.
@@ -106,7 +106,7 @@ class RegClient : public ProcessInterface{
 
 
 		/*! Contains information about the corresponding plugin.*/
-		Plugin* plugin;
+		PluginInfo* plugin;
 		/*! Instance of json rpc parser, using rapidjson.*/
 		JsonRPC* json;
 

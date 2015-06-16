@@ -5,7 +5,7 @@ struct sockaddr_un RegClient::address;
 socklen_t RegClient::addrlen;
 
 
-RegClient::RegClient(Plugin* plugin, list<string*>* functionList, const char* regPath)
+RegClient::RegClient(PluginInfo* plugin, list<string*>* functionList, const char* regPath)
 {
 	this->regPath = regPath;
 	this->plugin = plugin;
@@ -37,7 +37,6 @@ RegClient::~RegClient()
 		delete comPoint;
 
 	deleteFunctionList();
-	delete plugin;
 	delete json;
 	delete globalDom;
 }

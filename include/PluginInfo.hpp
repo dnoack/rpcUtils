@@ -1,5 +1,5 @@
-#ifndef INCLUDE_PLUGIN_HPP_
-#define INCLUDE_PLUGIN_HPP_
+#ifndef INCLUDE_PLUGININFO_HPP_
+#define INCLUDE_PLUGININFO_HPP_
 
 
 #include <string>
@@ -10,13 +10,13 @@ using namespace std;
 
 
 /**
- * class Plugin
+ * class PluginInfo
  * Contains information about a real plugin. This information contains the
  * name, pluginNumber, path to the unix domain socket file and all known methods with their
  * full name. With the information of a plugin instance , it is possible to create a
  * instance of ComPoint which is a connection to this plugin.
  */
-class Plugin{
+class PluginInfo{
 
 	public:
 
@@ -25,9 +25,9 @@ class Plugin{
 		 * \param name Contains the unique name of this plugin. E.g. "Aardvark" or "I2c".
 		 * \param pluginNumber Contains the unique number of this plugin.
 		 * \param path Contains the path to the corresponding unix domain socket file.
-		 * \note Instances of plugin are generated during the registration process.
+		 * \note Instances of PluginInfo are generated during the registration process.
 		 */
-		Plugin(const char* name, int pluginNumber, const char* path)
+		PluginInfo(const char* name, int pluginNumber, const char* path)
 		{
 			this->name = new string(name);
 			this->pluginNumber = pluginNumber;
@@ -37,9 +37,9 @@ class Plugin{
 
 		/**
 		 * Copy-Constructor.
-		 * \param plugin The plugin instance which should be copied.
+		 * \param plugin The PluginInfo instance which should be copied.
 		 */
-		Plugin(Plugin* plugin)
+		PluginInfo(PluginInfo* plugin)
 		{
 			this->name = new string(*(plugin->getName()));
 			this->pluginNumber = plugin->getPluginNumber();
@@ -50,7 +50,7 @@ class Plugin{
 		/**
 		 * Destructor.
 		 */
-		virtual ~Plugin()
+		virtual ~PluginInfo()
 		{
 			delete name;
 			delete udsFilePath;
@@ -130,4 +130,4 @@ class Plugin{
 };
 
 
-#endif /* INCLUDE_PLUGIN_HPP_ */
+#endif /* INCLUDE_PLUGININFO_HPP_ */
