@@ -9,12 +9,13 @@
 #include "document.h"
 #include "Error.hpp"
 
+
 using namespace std;
 using namespace rapidjson;
 
 
 /**
- * \interface DriverInterface
+ * \interface RPCInterface
  * DriverInterface is a template interface class which should be implemented by all classes which offer rpc functions.
  * The first template parameter has to be a pointer to the class which inherits from DriverInterface itself. The second one has to
  * be the typedef of the functionpointer of functions which should be rpc functions.
@@ -24,19 +25,19 @@ using namespace rapidjson;
  * to this map can be called through executeFunction().
  */
 template <class TDriver, class TPointer>
-class DriverInterface{
+class RPCInterface{
 
 	public:
 		/** Base-Constructor.
 		 * \param derivedClass A pointer to the class which inherits from DriverInterface.
 		 */
-		DriverInterface(TDriver derivedClass)
+		RPCInterface(TDriver derivedClass)
 		{
 			driver = derivedClass;
 		};
 
 		/** Base-Destructor.*/
-		virtual ~DriverInterface()
+		virtual ~RPCInterface()
 		{
 			funcMap.clear();
 		};
@@ -75,8 +76,6 @@ class DriverInterface{
 		list<string*>* getAllFunctionNames()
 		{
 			list<string*>* funcList = new list<string*>();
-			//TODO: maybe change this to an internal list, so we dont allocate always a new one.
-			//then we need to take care about callers and there deallocate.
 
 			for(typename map<const char*,TPointer>::iterator it=funcMap.begin(); it != funcMap.end(); it++)
 			{
@@ -104,7 +103,7 @@ class DriverInterface{
 
 
 		/*! Map of functionnames (keys) and functionpointers of the derived class (values)*/
-		map<const char*, TPointer, DriverInterface::cmp_keys> funcMap;
+		map<const char*, TPointer, RPCInterface::cmp_keys> funcMap;
 		/*! Typedef of the functionpointer of the derived class.*/
 		TPointer funcP;
 		/*! Pointer to the derived class.*/
