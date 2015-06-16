@@ -7,18 +7,21 @@ CPP_SRCS += \
 ../src/ComPoint.cpp \
 ../src/ComPointB.cpp \
 ../src/JsonRPC.cpp \
+../src/LogUnit.cpp \
 ../src/RPCMsg.cpp 
 
 OBJS += \
 ./src/ComPoint.o \
 ./src/ComPointB.o \
 ./src/JsonRPC.o \
+./src/LogUnit.o \
 ./src/RPCMsg.o 
 
 CPP_DEPS += \
 ./src/ComPoint.d \
 ./src/ComPointB.d \
 ./src/JsonRPC.d \
+./src/LogUnit.d \
 ./src/RPCMsg.d 
 
 
@@ -26,7 +29,7 @@ CPP_DEPS += \
 src/%.o: ../src/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
-	g++ -g -DDEBUG -I"/home/dave2/git/rpcUtils/include" -I"/home/dave2/git/rpcUtils/include/mocks" -I/home/dave2/git/cpputest/include -I/home/dave2/git/cpputest/include/CppUTest -I/home/dave2/git/cpputest/include/CppUTestExt -I/home/dave2/git/rapidjson/include/rapidjson -O0 -g3 -Wall -c -fmessage-length=0 -I ../include -I /home/dave2/libs/rapidjson/include/rapidjson -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+	g++ -g -DDEBUG -I"/home/dave2/git/rpcUtils/include" -I"/home/dave2/git/rpcUtils/include/mocks" -I/home/dave2/git/cpputest/include -I/home/dave2/git/cpputest/include/CppUTest -I/home/dave2/git/cpputest/include/CppUTestExt -I/home/dave2/git/rapidjson/include/rapidjson -O0 -g3 -Wall -c -fmessage-length=0 ${CXXFLAGS} -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 
