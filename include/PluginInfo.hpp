@@ -47,9 +47,7 @@ class PluginInfo{
 			comPoint = NULL;
 		}
 
-		/**
-		 * Destructor.
-		 */
+		/** Destructor. */
 		virtual ~PluginInfo()
 		{
 			delete name;

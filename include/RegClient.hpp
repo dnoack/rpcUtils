@@ -26,9 +26,9 @@ using namespace std;
 
 
 /**
- * \class UdsRegClient
- * UdsRegClient handles the registration of the corresponding plugin to RSD.
- * It uses a known unix domain socket file for registering nad tells the RSD
+ * \class RegClient
+ * RegClient handles the registration of a plugin to RSD.
+ * It uses a known unix domain socket file for registering and tells the RSD
  * the name, id ,unix domain socket file for communication and all known rpc function
  * of the plugin. If something goes wrong during the registration, the connection_socket will be
  * closed, which results in shutting down the whole plugin.
@@ -46,15 +46,13 @@ class RegClient : public ProcessInterface{
 		 */
 		RegClient(PluginInfo* plugin, list<string*>* functionList, const char* regPath);
 
-		/**
-		 * Destructor.
-		 */
+		/** Base-destructor. */
 		virtual ~RegClient();
 
 
 		/**
-		 * Trys to connect to RSD over unix domain socket. On success a new instance of
-		 * UdsRegWorker will be created, which can receive and send data to RSD.
+		 * Trys to connect to RSD over unix domain socket. On success a new ComPoint
+		 *  will be created, which can receive and send data to RSD.
 		 * \throws Instance of Error exception if it fails to connect to RSD.
 		 */
 		void connectToRSD();
@@ -66,21 +64,21 @@ class RegClient : public ProcessInterface{
 		 */
 		void sendAnnounceMsg();
 
-		/**
-		 * Not implemented, yet.
-		 */
+		/** Not implemented, yet. */
 		void unregisterFromRSD();
 
 		/**
-		 * Incomming message from UdsRegWorker during the registration process will be send
+		 * Incoming message from ComPoint during the registration process will be send
 		 * to this method. It will analyze the message and if they are correct, it will change
 		 * the state of the registration process. If something goes wrong, the state will be set
-		 * to BROKEn and the connection_socket will be closed.
+		 * to BROKEN and the connection_socket will be closed.
+		 * \param input Containing JSON RPC message
+		 * \return Containing the corresponding JSON RPC response, error or notification.
 		 */
 		OutgoingMsg* process(IncomingMsg* input);
 
 		/**
-		 * Checks the underlying UdsRegWorker instance if it is deletable.
+		 * Checks the underlying ComPoint instance if it is deletable.
 		 * \return The value of the deletable flag of the underlying UdsRegWorker, if there is none it returns false.
 		 */
 		bool isDeletable()
@@ -93,6 +91,7 @@ class RegClient : public ProcessInterface{
 
 	private:
 
+		/*! Contains all known rpc functions of the corresponding plugin.*/
 		list<string*>* functionList;
 		/*! Unix domain socket address struct.*/
 		static struct sockaddr_un address;
@@ -139,6 +138,7 @@ class RegClient : public ProcessInterface{
 		/**
 		 * Creates a the register message whithin the register process, which is end to RSD after receiving a announce ACk
 		 * message. The register message contains all known functions of the corresponding plugin.
+		 * \param input Containing the announceACK message.
 		 * \return A valid json rpc message which contains a the register message.
 		 */
 		OutgoingMsg* createRegisterMsg(IncomingMsg* input);
@@ -153,10 +153,12 @@ class RegClient : public ProcessInterface{
 		/**
 		 * Creates a pluginActive message, which completes the registration process and signals RSD that this plugin
 		 * is ready to work.
+		 * \param input Containing the registerACK message.
+		 * \return Json RPC notification with pluginActive message.
 		 */
 		OutgoingMsg* createPluginActiveMsg(IncomingMsg* input);
 
-
+		/** Deallocates all members of the functionList and the list itself.*/
 		void deleteFunctionList();
 };
 

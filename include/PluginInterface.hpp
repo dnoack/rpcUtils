@@ -23,53 +23,91 @@
 
 using namespace std;
 
+/**
+ * \interface PluginInterface
+ *
+ */
 class PluginInterface : public AcceptThread, public LogUnit{
 
 	public:
+
+		/**
+		 * Constructor.
+		 * \param plugin Have to contain name, number and file path for communication of the plugin.
+		 */
 		PluginInterface(PluginInfo* plugin);
+
+		/** Base-Destructor.*/
 		virtual ~PluginInterface();
 
 		/**
 		 * Start the plugin. This means, it tries to register to RSD and after that executing a loop
-		 * where it constantly searches for deletable worker.
+		 * where it constantly searches for deletable ComPoints.
 		 */
 		void start();
 
-		void checkForDeletableWorker();
+
+		/** Searches for inactive ComPoints and deletes them. */
+		void checkForDeleteableComPoints();
 
 	protected:
 
+		 /*! Socket for receiving new incoming IPC connections.*/
 		 int connection_socket;
+		 /*! Unique plugin number.*/
 		 int pluginNumber;
+		 /*! Unique plugin name.*/
 		 string* pluginName;
+		 /*! File path for Unix domain socket file.*/
 		 string* pluginPath;
 
-		 /*!LogInformation for underlying ComPoints.*/
+		 /*!LogInformation for incoming messages of underlying ComPoints.*/
 		LogInformation infoIn;
+		 /*!LogInformation for outgoing messages of underlying ComPoints.*/
 		LogInformation infoOut;
+		 /*!LogInformation for underlying ComPoints.*/
 		LogInformation info;
 
+		/*! Contains all created ComPoints except the one for registration.*/
 		list<ComPoint*> comPointList;
-		pthread_mutex_t wLmutex;
+		/*! Protects comPointList .*/
+		pthread_mutex_t cpLMutex;
 
+		/*! Optionflag for accept_socket.*/
 		int optionflag;
+		/*! Unix domain socket address.*/
 		struct sockaddr_un address;
+		/*! Size of Unix domain socket address.*/
 		socklen_t addrlen;
 
 
 		/*! Handles the registry process to RSD.*/
 		RegClient* regClient;
 
+		/*! Signalmask for whole plugin.*/
 		sigset_t sigmask;
+		/*! Old signal mask of plugin.*/
 		sigset_t origmask;
 
 		/*! As long as this flag is true, the server will run his mainloop in start().*/
 		bool pluginActive;
 
+		/**
+		 * Adds a ComPoint to the list of ComPoints.
+		 * \param newWorker A new created and already connected ComPoint to RSD.
+		 */
 		void pushComPointList(ComPoint* newWorker);
+
+		/**
+		 * Deallocates all ComPoints within the list of ComPoints and the list itself.
+		 */
 		void deleteComPointList();
 
-
+		/**
+		 * Has to accept new connections and create a new instance of a class which implements ProcessInterface(B).
+		 * After that it has to use pushComPointList to add the new ComPoint to the list of all ComPoints.
+		 * \pure
+		 */
 		virtual void thread_accept() = 0;
 };
 

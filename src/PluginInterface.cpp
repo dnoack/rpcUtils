@@ -34,7 +34,7 @@ PluginInterface::PluginInterface(PluginInfo* plugin)
 	info.logLevel = LOG_INFO;
 	info.logName = "Plugin:";
 
-	pthread_mutex_init(&wLmutex, NULL);
+	pthread_mutex_init(&cpLMutex, NULL);
 	unlink(pluginPath->c_str());
 	setsockopt(connection_socket, SOL_SOCKET, SO_REUSEADDR, &optionflag, sizeof(optionflag));
 	bind(connection_socket, (struct sockaddr*)&address, addrlen);
@@ -54,7 +54,7 @@ PluginInterface::~PluginInterface()
 
 	deleteComPointList();
 	close(connection_socket);
-	pthread_mutex_destroy(&wLmutex);
+	pthread_mutex_destroy(&cpLMutex);
 }
 
 
@@ -69,7 +69,7 @@ void PluginInterface::start()
 		while(pluginActive)
 		{
 			sleep(WAIT_TIME);
-			checkForDeletableWorker();
+			checkForDeleteableComPoints();
 			if(regClient->isDeletable())
 				pluginActive = false;
 		}
@@ -96,16 +96,16 @@ void PluginInterface::deleteComPointList()
 
 void PluginInterface::pushComPointList(ComPoint* comPoint)
 {
-	pthread_mutex_lock(&wLmutex);
+	pthread_mutex_lock(&cpLMutex);
 	comPointList.push_back(comPoint);
 	//dyn_print("Uds---> Number of UdsWorker: %d \n", comPointList.size());
-	pthread_mutex_unlock(&wLmutex);
+	pthread_mutex_unlock(&cpLMutex);
 }
 
 
-void PluginInterface::checkForDeletableWorker()
+void PluginInterface::checkForDeleteableComPoints()
 {
-	pthread_mutex_lock(&wLmutex);
+	pthread_mutex_lock(&cpLMutex);
 
 	list<ComPoint*>::iterator i = comPointList.begin();
 	while(i != comPointList.end())
@@ -120,6 +120,6 @@ void PluginInterface::checkForDeletableWorker()
 		else
 			++i;
 	}
-	pthread_mutex_unlock(&wLmutex);
+	pthread_mutex_unlock(&cpLMutex);
 }
 
