@@ -47,7 +47,11 @@ void RegClient::connectToRSD()
 	if( connect(connection_socket, (struct sockaddr*)&address, addrlen) != 0 )
 		throw Error(-1101, "Could not connect to RSD.\n");
 	else
-		comPoint = new ComPoint(connection_socket, this, plugin->getPluginNumber());
+	{
+		comPoint = new ComPoint(connection_socket, this, plugin->getPluginNumber(), false);
+		comPoint->setLogMethod(SYSLOG_LOG);
+		comPoint->startWorking();
+	}
 }
 
 

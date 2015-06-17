@@ -24,17 +24,11 @@ class ComPointB : public ComPoint{
 		 * \param uniqueID Unique identifier which should be 0 for RSD front and greater 0 for a plugin.
 		 * \throws Error If the listener is not started during a defined time (defined by WorkerThread.hpp).
 		 */
-		ComPointB(int socket, ProcessInterfaceB* pInterface, int uniqueID) :
-			ComPoint(socket, (ProcessInterface*)pInterface, uniqueID, false)
+		ComPointB(int socket, ProcessInterfaceB* pInterface, int uniqueID, bool startInstant=false) :
+			ComPoint(socket, (ProcessInterface*)pInterface, uniqueID, startInstant)
 		{
 			this->pInterface = pInterface;
 			pInterface->setComPoint(this); //important for the ability of sending subresponses
-			StartWorkerThread();
-
-			if(wait_for_listener_up() != 0)
-				throw Error("Creation of Listener/worker threads failed.");
-			else
-				dlog(logInfo, "Created ComPoint with uniqueID %d and socket number: %d.", uniqueID, socket);
 		};
 
 		/** Base-Destructor */

@@ -53,9 +53,6 @@ ComPoint::ComPoint(int socket, ProcessInterface* pInterface, int uniqueID, bool 
 
 		if(wait_for_listener_up() != 0)
 			throw Error("Creation of Listener/worker threads failed.");
-		else
-			dlog(logInfo, "Created ComPoint.");
-			//TODO: add some specific information about this compoint
 	}
 }
 

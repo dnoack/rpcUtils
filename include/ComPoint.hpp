@@ -76,6 +76,9 @@ class ComPoint :  public WorkerThreads, public LogUnit{
 		{
 			if(getWorker() == 0 && getListener() == 0)
 				StartWorkerThread();
+
+			if(wait_for_listener_up() != 0)
+				throw Error("Creation of Listener/worker threads failed.");
 		}
 
 		/**
