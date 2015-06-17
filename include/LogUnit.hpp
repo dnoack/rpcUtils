@@ -6,19 +6,25 @@
 #include <time.h>
 #include <cstring>
 #include <string>
+#include <syslog.h>
 
 #include "Error.hpp"
 
 /*! Bitmask for disable logging.*/
-#define LOG_OFF 0
+#define _LOG_OFF 0
 /*! Bitmask for loglevel 1.*/
-#define LOG_INPUT 1
+#define _LOG_INPUT 1
 /*! Bitmask for loglevel 2.*/
-#define LOG_OUTPUT 2
+#define _LOG_OUTPUT 2
 /*! Bitmask for loglevel 3.*/
-#define LOG_INFO 4
+#define _LOG_INFO 4
 /*! Bitmask for log messages from all loglevels.*/
-#define LOG_ALL 7
+#define _LOG_ALL 7
+
+/*! Constant for logMethod, enables logging to console with printf.*/
+#define PRINTF_LOG 0
+/*! Constant for logMethod, enables logging with syslog.*/
+#define SYSLOG_LOG 1
 
 /** Standard max. number of characters in one line.*/
 #define LINESIZE 80
@@ -60,11 +66,13 @@ class LogUnit
 	public:
 		/** Base-Constructor, setting loglevel of logInfo to LOG_INFO (4) and
 		 * the max number of characters per line to 80.*/
-		LogUnit()
+		LogUnit(int logMethod = PRINTF_LOG, int syslogFacility = LOG_LOCAL0)
 		{
-			logInfo.logLevel = LOG_INFO;
+			logInfo.logLevel = _LOG_INFO;
 			logInfo.logName = ":";
 			lineSize = LINESIZE;
+			this->logMethod = logMethod;
+			this->syslogFacility = syslogFacility;
 		}
 
 		/** Base Destructor.*/
@@ -80,8 +88,8 @@ class LogUnit
 		int setGlobalLogLevel(int level)
 		{
 			int oldLevel = globalLogLevel;
-			if(level != LOG_OFF || level != LOG_INPUT || level != LOG_OUTPUT
-				|| level != LOG_INFO || level != LOG_ALL)
+			if(level != _LOG_OFF || level != _LOG_INPUT || level != _LOG_OUTPUT
+				|| level != _LOG_INFO || level != _LOG_ALL)
 			{
 
 				globalLogLevel = level;
@@ -97,6 +105,17 @@ class LogUnit
 		 */
 		void setLineSize(int lineSize){this->lineSize = lineSize;}
 
+		/** Sets the logMethod either to printf or syslog (see defines).
+		 * \param logMethod Should be 0 for printf and 1 for syslog.
+		 */
+		void setLogMethod(int logMethod){this->logMethod = logMethod;}
+
+		/**
+		 * Sets the facility for facility part of the syslog priority parameter.
+		 * \param facility Facility constant from syslog.h
+		 */
+		void setSyslogFacility(int facility){this->syslogFacility = facility;}
+
 
 	protected:
 
@@ -104,6 +123,10 @@ class LogUnit
 		LogInformation logInfo;
 		/*! Contains max. number of characters in one line.*/
 		int lineSize;
+		/*! Specifies the method how the message should be logged.*/
+		int logMethod;
+		/*! Specifies the syslog facility for logging.*/
+		int syslogFacility;
 
 
 		/**
@@ -176,11 +199,20 @@ class LogUnit
 		 */
 		void _log(const char* logName, string* logMsg)
 		{
-			formatString(strlen(logName), &logMsg);
-			logMsg->replace(0, strlen(logName), logName);
-			getTimeStamp(&logMsg);
-			dyn_print("%s", logMsg->c_str());
-			//Additional output methods or something could be add here
+			switch(logMethod)
+			{
+				case PRINTF_LOG:
+					formatString(strlen(logName), &logMsg);
+					logMsg->replace(0, strlen(logName), logName);
+					getTimeStamp(&logMsg);
+					dyn_print("%s", logMsg->c_str());
+					break;
+				case SYSLOG_LOG:
+					logMsg->insert(0, strlen(logName), ' ');
+					logMsg->replace(0, strlen(logName), logName);
+					syslog(syslogFacility | LOG_NOTICE, "%s", logMsg->c_str());
+					break;
+			}
 			delete logMsg;
 		}
 

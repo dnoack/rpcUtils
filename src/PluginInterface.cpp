@@ -27,11 +27,11 @@ PluginInterface::PluginInterface(PluginInfo* plugin)
 	address.sun_family = AF_UNIX;
 	strncpy(address.sun_path, pluginPath->c_str(), pluginPath->size());
 	addrlen = sizeof(address);
-	infoIn.logLevel = LOG_INPUT;
+	infoIn.logLevel = _LOG_INPUT;
 	infoIn.logName = "IPC IN:";
-	infoOut.logLevel = LOG_OUTPUT;
+	infoOut.logLevel = _LOG_OUTPUT;
 	infoOut.logName = "IPC OUT:";
-	info.logLevel = LOG_INFO;
+	info.logLevel = _LOG_INFO;
 	info.logName = "Plugin:";
 
 	pthread_mutex_init(&cpLMutex, NULL);

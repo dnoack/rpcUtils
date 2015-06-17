@@ -8,21 +8,27 @@ CPP_SRCS += \
 ../src/ComPointB.cpp \
 ../src/JsonRPC.cpp \
 ../src/LogUnit.cpp \
-../src/RPCMsg.cpp 
+../src/PluginInterface.cpp \
+../src/RPCMsg.cpp \
+../src/RegClient.cpp 
 
 OBJS += \
 ./src/ComPoint.o \
 ./src/ComPointB.o \
 ./src/JsonRPC.o \
 ./src/LogUnit.o \
-./src/RPCMsg.o 
+./src/PluginInterface.o \
+./src/RPCMsg.o \
+./src/RegClient.o 
 
 CPP_DEPS += \
 ./src/ComPoint.d \
 ./src/ComPointB.d \
 ./src/JsonRPC.d \
 ./src/LogUnit.d \
-./src/RPCMsg.d 
+./src/PluginInterface.d \
+./src/RPCMsg.d \
+./src/RegClient.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

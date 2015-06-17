@@ -1,6 +1,6 @@
 #define private public
 
-#include "Plugin.hpp"
+#include "PluginInfo.hpp"
 #include "TestHarness.h"
 
 
@@ -20,7 +20,7 @@ TEST_GROUP(Plugin)
 
 TEST(Plugin, addMethods)
 {
-	Plugin* plugin = new Plugin("Aardvark", 1, "/tmp/aardvark.ipc");
+	PluginInfo* plugin = new PluginInfo("Aardvark", 1, "/tmp/aardvark.ipc");
 	string* method1 = new string("add");
 	string* method2 = new string("sub");
 	list<string*>* methodList = NULL;
@@ -37,8 +37,8 @@ TEST(Plugin, addMethods)
 
 TEST(Plugin, checkMemory)
 {
-	Plugin* plugin1 = new Plugin("Aardvark", 1, "/tmp/aardvark.ipc");
-	Plugin* plugin2 = new Plugin(plugin1);
+	PluginInfo* plugin1 = new PluginInfo("Aardvark", 1, "/tmp/aardvark.ipc");
+	PluginInfo* plugin2 = new PluginInfo(plugin1);
 
 
 	delete plugin1;

@@ -1,3 +1,3 @@
 #include "LogUnit.hpp"
 
-int LogUnit::globalLogLevel = LOG_ALL;
+int LogUnit::globalLogLevel = _LOG_ALL;
