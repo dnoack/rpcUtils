@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <ctime>
 
-#define TIMEOUT 5
+#define WT_TIMEOUT 2
 
 
 /**
@@ -85,7 +85,7 @@ class WorkerThreads{
 	   int wait_for_listener_up()
 	   {
 		   time_t startTime = time(NULL);
-		   while(time(NULL) - startTime < TIMEOUT)
+		   while(time(NULL) - startTime < WT_TIMEOUT)
 		   {
 			   if(_listener != 0)
 				   return 0;

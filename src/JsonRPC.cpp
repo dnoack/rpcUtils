@@ -536,8 +536,6 @@ const char* JsonRPC::generateRequest(Value &method, Value &params, Value &id)
 
 const char* JsonRPC::generateResponse(Value &id, Value &response)
 {
-	//clear buffer
-	Value* oldResult;
 	Value copyId;
 
 	sBuffer.Clear();

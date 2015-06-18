@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <ctime>
 
-#define TIMEOUT 2
+#define AT_TIMEOUT 2
 
 
 /**
@@ -69,7 +69,7 @@ class AcceptThread
 		int wait_for_accepter_up()
 		{
 		   time_t startTime = time(NULL);
-		   while(time(NULL) - startTime < TIMEOUT)
+		   while(time(NULL) - startTime < AT_TIMEOUT)
 		   {
 			   if(_accepter != 0)
 				   return 0;
