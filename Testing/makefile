@@ -46,7 +46,7 @@ all: rpcUtils.so
 rpcUtils.so: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
-	g++ -L/home/dave2/git/cpputest/cpputest_build/lib -o "rpcUtils.so" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++ -L/home/dave2/git/cpputest/cpputest_build/lib ${LDFLAGS} -o "rpcUtils.so" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 

@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <ctime>
 
-#define TIMEOUT 2
+#define TIMEOUT 5
 
 
 /**

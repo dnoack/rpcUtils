@@ -538,13 +538,18 @@ const char* JsonRPC::generateResponse(Value &id, Value &response)
 {
 	//clear buffer
 	Value* oldResult;
+	Value copyId;
+
 	sBuffer.Clear();
 	jsonWriter->Reset(sBuffer);
 
-	//swap current result value with the old one and get the corresponding id
-	oldResult = &((*responseDOM)["result"]);
-	oldResult->Swap(response);
-	(*responseDOM)["id"] = id.GetInt();
+	//we always got a method in a request
+	responseDOM->RemoveMember("result");
+	responseDOM->AddMember("result", response, responseDOM->GetAllocator());
+
+	responseDOM->RemoveMember("id");
+	copyId.CopyFrom(id, responseDOM->GetAllocator());
+	responseDOM->AddMember("id", copyId, responseDOM->GetAllocator());
 
 	//write DOM to sBuffer
 	responseDOM->Accept(*jsonWriter);

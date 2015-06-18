@@ -9,7 +9,6 @@ ComPoint::ComPoint()
 	msgBuffer = NULL;
 	msgBufferSize = 0;
 	tempBuffer = NULL;
-	//headerIn = new char[HEADER_SIZE];
 	headerOut = new char[HEADER_SIZE];
 	deletable = false;
 }
@@ -358,7 +357,7 @@ void ComPoint::deleteReceiveQueue()
 {
 	list<RPCMsg*>::iterator i;
 	pthread_mutex_lock(&rQmutex);
-	if(receiveQueue.size() > 0)
+	if(receiveQueue.size() > 0) //TODO:
 	{
 		i = receiveQueue.begin();
 		while(i != receiveQueue.end())

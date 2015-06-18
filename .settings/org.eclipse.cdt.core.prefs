@@ -5,6 +5,9 @@ environment/project/cdt.managedbuild.config.gnu.so.debug.358784561.1775709149/CF
 environment/project/cdt.managedbuild.config.gnu.so.debug.358784561.1775709149/CXXFLAGS/delimiter=\:
 environment/project/cdt.managedbuild.config.gnu.so.debug.358784561.1775709149/CXXFLAGS/operation=append
 environment/project/cdt.managedbuild.config.gnu.so.debug.358784561.1775709149/CXXFLAGS/value=${CFLAGS}
+environment/project/cdt.managedbuild.config.gnu.so.debug.358784561.1775709149/LDFLAGS/delimiter=\:
+environment/project/cdt.managedbuild.config.gnu.so.debug.358784561.1775709149/LDFLAGS/operation=append
+environment/project/cdt.managedbuild.config.gnu.so.debug.358784561.1775709149/LDFLAGS/value=
 environment/project/cdt.managedbuild.config.gnu.so.debug.358784561.1775709149/append=true
 environment/project/cdt.managedbuild.config.gnu.so.debug.358784561.1775709149/appendContributed=true
 environment/project/cdt.managedbuild.config.gnu.so.debug.358784561/CFLAGS/delimiter=\:

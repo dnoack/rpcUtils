@@ -7,7 +7,8 @@
 #include "TestHarness.h"
 
 
-static ComPointMock* comPoint = NULL;
+static ComPointMock* comPointMock = NULL;
+static ComPoint* comPoint = NULL;
 static ProcessInterfaceMock* processInterface = NULL;
 static SocketTestHelper* helper = NULL;
 
@@ -17,46 +18,32 @@ TEST_GROUP(ComPoint)
 	{
 		processInterface = new ProcessInterfaceMock();
 		helper = new SocketTestHelper(AF_UNIX, SOCK_STREAM, "/tmp/test_com.uds");
-		comPoint = new ComPointMock(helper->getServerSocket(), processInterface, 0);
+		comPointMock = new ComPointMock(helper->getServerSocket(), processInterface, 0);
 	}
 
 	void teardown()
 	{
 		delete processInterface;
-		delete comPoint;
+		delete comPointMock;
 		delete helper;
 	}
 };
 
 
-TEST(ComPoint, waitForFurtherData_and_timeout)
+TEST_GROUP(ComPoint_simpleFunctions)
 {
-	SocketTestHelper* helper = new SocketTestHelper(AF_UNIX, SOCK_STREAM, "/tmp/test_com.uds");
-	comPoint->currentSocket = helper->getServerSocket();
-	comPoint->socketToFDSET();
-	//will be deleted by Destructor of interface
-	comPoint->msgBuffer = new char[1024];
-	CHECK_THROWS(Error, comPoint->waitForFurtherData());
-	delete helper;
-}
+	void setup()
+	{
+		comPoint = new ComPoint();
+	}
 
+	void teardown()
+	{
+		delete comPoint;
+	}
+};
 
-TEST(ComPoint, waitForFurtherData_and_sendit)
-{
-	SocketTestHelper* helper = new SocketTestHelper(AF_UNIX, SOCK_STREAM, "/tmp/test_com.uds");
-	comPoint->currentSocket = helper->getServerSocket();
-	comPoint->socketToFDSET();
-	//will be deleted by Destructor of interface
-	comPoint->msgBuffer = new char[1024];
-
-	send(helper->getClientSocket(), "hallo", 5, 0);
-	comPoint->waitForFurtherData();
-
-	delete helper;
-}
-
-
-TEST(ComPoint, pushMsgs_popWithOutDelete_checkSize)
+TEST(ComPoint_simpleFunctions, pushMsgs_popWithOutDelete_checkSize)
 {
 	RPCMsg* msg = new RPCMsg(0, "And another message");
 	comPoint->push_frontReceiveQueue(msg);
@@ -68,7 +55,7 @@ TEST(ComPoint, pushMsgs_popWithOutDelete_checkSize)
 
 
 
-TEST(ComPoint, pushMsgs_checkSizeOfQueue_deleteQueue)
+TEST(ComPoint_simpleFunctions, pushMsgs_checkSizeOfQueue_deleteQueue)
 {
 	RPCMsg* msg = new RPCMsg(0, "This is a testmessage");
 	RPCMsg* msg2 = new RPCMsg(0, "Another message");
@@ -80,7 +67,7 @@ TEST(ComPoint, pushMsgs_checkSizeOfQueue_deleteQueue)
 }
 
 
-TEST(ComPoint, pushMsg_and_popit)
+TEST(ComPoint_simpleFunctions, pushMsg_and_popit)
 {
 	RPCMsg* msg = new RPCMsg(0, "This is a testmessage.");
 	comPoint->push_frontReceiveQueue(msg);
@@ -88,7 +75,7 @@ TEST(ComPoint, pushMsg_and_popit)
 }
 
 
-TEST(ComPoint, makeHeader_negativeValue)
+TEST(ComPoint_simpleFunctions, makeHeader_negativeValue)
 {
 	int testValue = -30001;
 	char* header = new char[HEADER_SIZE];
@@ -102,7 +89,7 @@ TEST(ComPoint, makeHeader_negativeValue)
 }
 
 
-TEST(ComPoint, makeHeader_and_convertBack)
+TEST(ComPoint_simpleFunctions, makeHeader_and_convertBack)
 {
 	char* header = new char[HEADER_SIZE];
 
@@ -137,11 +124,35 @@ TEST(ComPoint, makeHeader_and_convertBack)
 }
 
 
-TEST(ComPoint, convertInt_to_binaryCharArray)
+TEST(ComPoint_simpleFunctions, convertInt_to_binaryCharArray)
 {
 	char* header = new char[HEADER_SIZE];
 	comPoint->createHeader(header, 1024);
 	delete[] header;
+}
+
+
+TEST(ComPoint, waitForFurtherData_and_timeout)
+{
+	comPointMock->currentSocket = helper->getServerSocket();
+	comPointMock->socketToFDSET();
+	//will be deleted by Destructor of interface
+	comPointMock->msgBuffer = new char[1024];
+	CHECK_THROWS(Error, comPointMock->waitForFurtherData());
+
+}
+
+
+TEST(ComPoint, waitForFurtherData_and_sendit)
+{
+	comPointMock->currentSocket = helper->getServerSocket();
+	comPointMock->socketToFDSET();
+	//will be deleted by Destructor of interface
+	comPointMock->msgBuffer = new char[1024];
+
+	send(helper->getClientSocket(), "hallo", 5, 0);
+	comPointMock->waitForFurtherData();
+
 }
 
 
@@ -152,7 +163,7 @@ TEST(ComPoint, receiveMsg_everythingSplitted)
 	string* msg = new string("Hallo das ist eine Testnachricht, welche geteilt übertragen wird. Der Header übrigens auch.");
 	string subMsg = msg->substr(0, 10);
 	string subMsg2 = msg->substr(10, msg->size());
-	comPoint->createHeader(header, msg->size());
+	comPointMock->createHeader(header, msg->size());
 
 	send(helper->getClientSocket(), header, 1, 0);
 	send(helper->getClientSocket(), &header[1], 4, 0);
@@ -176,7 +187,7 @@ TEST(ComPoint, receiveMsg_splittedHeader)
 {
 	char* header = new char[5];
 	string* msg = new string("Der Header dieser Nachricht wurde in zwei Teilen übertragen.");
-	comPoint->createHeader(header, msg->size());
+	comPointMock->createHeader(header, msg->size());
 	send(helper->getClientSocket(), header, 3, 0);
 	sleep(1);
 	send(helper->getClientSocket(), &header[3], 2, 0);
@@ -199,7 +210,7 @@ TEST(ComPoint, receiMsg_splittedMsg)
 	string* msg = new string("Hallo das ist eine Testnachricht, welche geteilt übertragen wird.");
 	string subMsg = msg->substr(0, 10);
 	string subMsg2 = msg->substr(10, msg->size());
-	comPoint->createHeader(header, msg->size());
+	comPointMock->createHeader(header, msg->size());
 	send(helper->getClientSocket(), header, 5, 0);
 	send(helper->getClientSocket(), subMsg.c_str(), subMsg.size(), 0);
 	send(helper->getClientSocket(), subMsg2.c_str(), subMsg2.size(), 0);
@@ -225,7 +236,7 @@ TEST(ComPoint, receiveMsgwithNoHeader)
 TEST(ComPoint, receiveMsg)
 {
 	char* header = new char[5];
-	comPoint->createHeader(header, 5);
+	comPointMock->createHeader(header, 5);
 	send(helper->getClientSocket(), header, 5, 0);
 	send(helper->getClientSocket(), "hallo", 5, 0);
 
@@ -240,5 +251,5 @@ TEST(ComPoint, receiveMsg)
 
 TEST(ComPoint, memoryObjectTest)
 {
-
+	sleep(1);
 }
