@@ -59,6 +59,7 @@ void ComPointB::thread_listen()
 									{
 										log(logInfoIn, tempMsg->getContent());
 										pthread_kill(worker_thread, SIGUSR2);
+										delete tempMsg;
 									}
 									else
 									{

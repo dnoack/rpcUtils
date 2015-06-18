@@ -46,7 +46,7 @@ class IncomingMsg : public RPCMsg{
 		}
 
 		/** Base Destructor.*/
-		virtual ~IncomingMsg(){}
+		~IncomingMsg(){}
 
 		/** \return The content (JSON RPC message) of this container.*/
 		string* getContent(){return this->content;}

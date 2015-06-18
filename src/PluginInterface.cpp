@@ -25,6 +25,7 @@ PluginInterface::PluginInterface(PluginInfo* plugin)
 	optionflag = 1;
 	connection_socket = socket(AF_UNIX, SOCK_STREAM, 0);
 	address.sun_family = AF_UNIX;
+	memset(address.sun_path, '\0', 108);
 	strncpy(address.sun_path, pluginPath->c_str(), pluginPath->size());
 	addrlen = sizeof(address);
 	infoIn.logLevel = _LOG_INPUT;

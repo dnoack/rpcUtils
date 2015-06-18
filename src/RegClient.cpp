@@ -192,7 +192,7 @@ OutgoingMsg* RegClient::createRegisterMsg(IncomingMsg* input)
 	{
 		functionName = *function;
 		functionArray.PushBack(StringRef(functionName->c_str()), requestDOM->GetAllocator());
-		function = functionList->erase(function);
+		function++;
 	}
 
 
