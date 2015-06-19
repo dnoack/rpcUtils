@@ -44,7 +44,7 @@ all: librpcUtils.so
 librpcUtils.so: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
-	g++ -shared -o "librpcUtils.so" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++ ${LDFLAGS} -shared -o "librpcUtils.so" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 

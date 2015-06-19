@@ -19,13 +19,19 @@
 
 /*! Wait time in seconds for main poll loop.*/
 #define WAIT_TIME 3
+/*! Max number of concurrent clients connecting to a plugin.*/
 #define MAX_CLIENTS 20
 
 using namespace std;
 
 /**
  * \interface PluginInterface
- *
+ * Represents the common interface for every Plugin of Remote-Server-Daemon.
+ * Plugins always have to:
+ * - Implement thread_accept, where it create other class instances related to the Plugin (hw driver class or something like this).
+ * - Constructed with a PluginInfo object (\see PluginInfo).
+ * - Started with start() after the object construction.
+ * \note Because of inheriting from AcceptThread, the thread_accept() function will later run in a separate thread.
  */
 class PluginInterface : public AcceptThread, public LogUnit{
 

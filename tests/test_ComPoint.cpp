@@ -145,13 +145,21 @@ TEST(ComPoint, waitForFurtherData_and_timeout)
 
 TEST(ComPoint, waitForFurtherData_and_sendit)
 {
+	char* header = new char[5];
 	comPointMock->currentSocket = helper->getServerSocket();
 	comPointMock->socketToFDSET();
 	//will be deleted by Destructor of interface
 	comPointMock->msgBuffer = new char[1024];
 
+	comPointMock->createHeader(header, 10);
+	send(helper->getClientSocket(), header, 5, 0);
+
 	send(helper->getClientSocket(), "hallo", 5, 0);
 	comPointMock->waitForFurtherData();
+	sleep(1);
+	send(helper->getClientSocket(), " welt", 5, 0);
+
+	delete[] header;
 
 }
 
