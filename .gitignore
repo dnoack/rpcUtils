@@ -1,5 +1,5 @@
 /Debug/
 *.d
 *.o
-/Release/
-/Testing/
+*.so
+/Release32/
