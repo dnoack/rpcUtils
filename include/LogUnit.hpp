@@ -99,6 +99,9 @@ class LogUnit
 			return oldLevel;
 		}
 
+		static void setGlobalLogMethod(int method){globalLogMethod = method;}
+		static int getGlobalLogMethod(){return globalLogMethod;}
+
 		/**
 		 * Sets the maximum number of characters in one line.
 		 * \param lineSize Number of characters.
@@ -189,6 +192,7 @@ class LogUnit
 	private:
 		 /*! Global loglevel which defines the threshold value for logging.*/
 		 static int globalLogLevel;
+		 static int globalLogMethod;
 
 		 /**
 		 * Internal method for logging messages. The message is formated to the
