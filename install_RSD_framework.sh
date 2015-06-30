@@ -6,7 +6,7 @@ cd ${INSTALL_PATH}
 
 git clone https://github.com/miloyip/rapidjson
 git clone https://github.com/dnoack/rpcUtils
-git clone https://github.com/dnoack/Remote-Server-Deamon
+git clone https://github.com/dnoack/Remote-Server-Daemon
 git clone https://github.com/dnoack/Aardvark-Plugin
 git clone https://github.com/dnoack/I2C-Plugin
 
@@ -39,14 +39,14 @@ cd rpcUtils/Release
 make clean
 make
 
-cd ${CURRENT_PATH}${INSTALL_PATH}/Remote-Server-Deamon/Release
+cd ${CURRENT_PATH}/${INSTALL_PATH}/Remote-Server-Daemon/Release
 make clean
 make
 
-cd ${CURRENT_PATH}${INSTALL_PATH}/Aardvark-Plugin/Release
+cd ${CURRENT_PATH}/${INSTALL_PATH}/Aardvark-Plugin/Release
 make clean
 make
 
-cd ${CURRENT_PATH}${INSTALL_PATH}/I2C-Plugin
+cd ${CURRENT_PATH}/${INSTALL_PATH}/I2C-Plugin
 make clean
 make
