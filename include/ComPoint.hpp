@@ -136,6 +136,8 @@ class ComPoint :  public WorkerThreads, public LogUnit{
 		list<RPCMsg*> receiveQueue;
 		/*! Mutex to protect the receiveQueue, because thread_listen can push and thread_work can pop.*/
 		pthread_mutex_t rQmutex;
+		/*! Mutex to protect the transmit methods, because of concurrent access in TCP comPoint.*/
+		pthread_mutex_t tmutex;
 		/*! ReceiveBuffer of thread_listen for receiving data over a socket.*/
 		char receiveBuffer[BUFFER_SIZE];
 		/*! Dynamic buffer for receiving at least one whole encoded message.*/

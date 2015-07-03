@@ -24,7 +24,7 @@ class ProcessInterface{
 			pthread_mutex_init(&processMutex, NULL);
 			pthread_mutex_init(&busyMutex, NULL);
 			busy = false;
-			comPoint = NULL;
+			//comPoint = NULL;
 		};
 
 		/** Base-Desctructor.*/
@@ -82,7 +82,7 @@ class ProcessInterface{
 
 		/** Corresponding comPoint. Will only be used if there is need
 		 * for subRequests during the process of a message.*/
-		ComPoint* comPoint;
+		//ComPoint* comPoint;
 
 		/**
 		 * Sets the busy flag of this Interface to busy or not busy.

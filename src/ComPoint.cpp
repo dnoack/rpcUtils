@@ -21,6 +21,7 @@ ComPoint::ComPoint(int socket, ProcessInterface* pInterface, int uniqueID, bool 
 	this->uniqueID = uniqueID;
 
 	pthread_mutex_init(&rQmutex, NULL);
+	pthread_mutex_init(&tmutex, NULL);
 
 	currentSig = 0;
 
@@ -72,6 +73,7 @@ ComPoint::~ComPoint()
 	deleteBuffer(tempBuffer);
 
 	pthread_mutex_destroy(&rQmutex);
+	pthread_mutex_destroy(&tmutex);
 }
 
 
@@ -250,10 +252,12 @@ void ComPoint::thread_listen()
 int ComPoint::transmit(const char* data, int size)
 {
 	int sendCount = 0;
-	createHeader(headerOut, size);
+	pthread_mutex_lock(&tmutex);
 	log(logInfoOut, data);
+	createHeader(headerOut, size);
 	sendCount = send(currentSocket, headerOut, HEADER_SIZE, 0);
 	sendCount += send(currentSocket, data, size, 0);
+	pthread_mutex_unlock(&tmutex);
 	return sendCount;
 };
 
@@ -263,11 +267,12 @@ int ComPoint::transmit(OutgoingMsg* output)
 	int sendCount = 0;
 	int msgSize = output->getContent()->size();
 	string* msgContent = output->getContent();
+	pthread_mutex_lock(&tmutex);
 	log(logInfoOut, msgContent);
-
 	createHeader(headerOut, msgSize);
 	sendCount = send(currentSocket, headerOut, HEADER_SIZE, 0);
 	sendCount += send(currentSocket, msgContent->c_str(), msgSize, 0);
+	pthread_mutex_unlock(&tmutex);
 	return sendCount;
 };
 

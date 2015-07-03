@@ -17,6 +17,7 @@ RegClient::RegClient(PluginInfo* plugin, list<string*>* functionList, const char
 	state = NOT_ACTIVE;
 	address.sun_family = AF_UNIX;
 	globalDom = new Document();
+	comPoint = NULL;
 
 	strncpy(address.sun_path, regPath, strlen(regPath));
 	addrlen = sizeof(address);

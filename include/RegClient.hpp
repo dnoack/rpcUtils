@@ -97,6 +97,7 @@ class RegClient : public ProcessInterface{
 		static struct sockaddr_un address;
 		/*! Length of address.*/
 		static socklen_t addrlen;
+		ComPoint* comPoint;
 
 		/*! Optionflag variable for connection_socket.*/
 		int optionflag;

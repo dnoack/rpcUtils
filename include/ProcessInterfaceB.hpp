@@ -20,7 +20,10 @@ class ProcessInterfaceB : public ProcessInterface{
 
 	public:
 		/** Base-Constructor.*/
-		ProcessInterfaceB(){};
+		ProcessInterfaceB()
+		{
+			this->comPoint = NULL;
+		};
 
 		/** Base-Desctructor.*/
 		virtual ~ProcessInterfaceB(){};
@@ -33,6 +36,9 @@ class ProcessInterfaceB : public ProcessInterface{
 		 * \note Has to be implemented by the class which inherits from ProcessInterfaceB.
 		 */
 		virtual bool isSubResponse(RPCMsg* rpcMsg) = 0;
+
+	protected:
+		ComPoint* comPoint;
 
 };
 
